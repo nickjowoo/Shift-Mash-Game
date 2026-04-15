@@ -205,6 +205,7 @@ export default function App() {
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [lastSubmittedId, setLastSubmittedId] = useState(null)
   const [totalPresses, setTotalPresses] = useState(0)
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false)
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -453,6 +454,49 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {showPrivacyPolicy && (
+  <div className="policy-overlay" onClick={() => setShowPrivacyPolicy(false)}>
+    <div className="policy-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="policy-header">
+        <h3 className="policy-title">Privacy Policy</h3>
+        <button
+          className="policy-close"
+          type="button"
+          onClick={() => setShowPrivacyPolicy(false)}
+          aria-label="Close privacy policy"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="policy-content">
+        <p>
+          This game collects the name you choose for the leaderboard, your score,
+          your device type, and the time your score was submitted.
+        </p>
+        <p>
+          This information is used only to run the leaderboard, show player rankings,
+          calculate total presses, and support the game’s features.
+        </p>
+        <p>
+          Scores and leaderboard information are stored using Supabase and the site is
+          hosted through Vercel. Basic technical information, such as IP address and
+          browser/device data, may also be processed by those services as part of normal
+          site operation.
+        </p>
+        <p>
+          This site does not currently use accounts, payments, or targeted advertising.
+          If the site changes in the future, this policy may be updated.
+        </p>
+        <p>
+          By submitting a name to the leaderboard, you agree to display that name and
+          score publicly within the game.
+        </p>
+        <p className="policy-effective">Effective date: 2026</p>
+      </div>
+    </div>
+  </div>
+)}
       <div className="container">
         <div className="grid">
           <section className="card">
@@ -705,7 +749,23 @@ export default function App() {
           </aside>
         </div>
 
-        <SiteFooter totalPresses={totalPresses} />
+        <footer className="site-footer">
+  <div className="community-total">
+    All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
+  </div>
+  <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+  <div className="footer-meta">
+    <span className="footer-year">2026</span>
+    <span className="footer-separator">•</span>
+    <button
+      className="privacy-policy-button"
+      type="button"
+      onClick={() => setShowPrivacyPolicy(true)}
+    >
+      Privacy Policy
+    </button>
+  </div>
+</footer>
       </div>
     </div>
   )
