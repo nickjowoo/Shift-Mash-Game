@@ -624,7 +624,6 @@ const submitScore = async () => {
         </div>
 
         <SiteFooter />
-        </footer>
       </div>
     </div>
   )
