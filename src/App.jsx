@@ -292,7 +292,7 @@ const [rankFlash, setRankFlash] = useState(false)
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
   const cloudReady = isSupabaseConfigured()
-  const prevRankRef = useRef(rank.label)
+  const prevRankRef = useRef(null)
 
   const playerPosition = useMemo(() => {
     return getPlayerPosition(leaderboard, lastSubmittedId)
