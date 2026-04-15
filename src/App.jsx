@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
-const MAX_LEADERBOARD = 10
-const RESET_HOURS = 24
+const RESET_HOURS = 48
 const RESET_MS = RESET_HOURS * 60 * 60 * 1000
 
 const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
@@ -49,7 +48,6 @@ function isSupabaseConfigured() {
   )
 }
 
-
 function getCurrentCycleStart() {
   const now = Date.now()
   return Math.floor(now / RESET_MS) * RESET_MS
@@ -64,25 +62,59 @@ function formatCountdown(ms) {
   const days = Math.floor(totalHours / 24)
   const hours = totalHours % 24
 
-  if (days > 0) {
-    return `${days}d ${hours}h`
-  }
-
+  if (days > 0) return `${days}d ${hours}h`
   return `${hours}h`
 }
 
 function detectMobileDevice() {
   if (typeof navigator === 'undefined') return false
-
   const ua = navigator.userAgent || ''
-  const mobileUa =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
-
-  return mobileUa || navigator.maxTouchPoints > 1
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || navigator.maxTouchPoints > 1
 }
 
 function getDeviceIcon(deviceType) {
   return deviceType === 'mobile' ? '📱' : '💻'
+}
+
+function isInappropriateName(name) {
+  const normalized = name
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[@]/g, 'a')
+    .replace(/[4]/g, 'a')
+    .replace(/[3]/g, 'e')
+    .replace(/[1!|]/g, 'i')
+    .replace(/[0]/g, 'o')
+    .replace(/[5$]/g, 's')
+    .replace(/[7]/g, 't')
+    .replace(/[^a-z0-9]/g, '')
+
+  const blockedTerms = [
+    'fuck', 'fucking', 'shit', 'bitch', 'asshole', 'dick', 'cock', 'pussy',
+    'cunt', 'nigger', 'nigga', 'fag', 'faggot', 'slut', 'whore', 'porn',
+    'sex', 'rape', 'rapist', 'hitler', 'nazi', 'kkk',
+  ]
+
+  return blockedTerms.some((term) => normalized.includes(term))
+}
+
+function isBadDisplayName(name) {
+  const trimmed = name.trim()
+  if (trimmed.length < 2) return true
+  const visibleChars = trimmed.replace(/[^a-zA-Z0-9]/g, '')
+  return visibleChars.length < 2
+}
+
+function getPlayerPosition(leaderboard, submittedId) {
+  if (!submittedId) return null
+  const sorted = [...leaderboard].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+  })
+  const index = sorted.findIndex((entry) => entry.id === submittedId)
+  if (index === -1) return null
+  return { position: index + 1, entry: sorted[index] }
 }
 
 async function supabaseRequest(path, options = {}) {
@@ -96,22 +128,6 @@ async function supabaseRequest(path, options = {}) {
       ...(options.headers || {}),
     },
   })
-  async function fetchTotalPresses() {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_total_presses`, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch total presses.')
-  }
-
-  return response.json()
-}
 
   if (!response.ok) {
     const text = await response.text()
@@ -122,7 +138,6 @@ async function supabaseRequest(path, options = {}) {
   if (contentType.includes('application/json')) {
     return response.json()
   }
-
   return null
 }
 
@@ -142,84 +157,35 @@ async function insertGlobalScore(name, score, deviceType) {
     body: JSON.stringify([{ name, score, device_type: deviceType }]),
   })
 }
-function getPlayerPosition(leaderboard, submittedId) {
-  if (!submittedId) return null
 
-  const sorted = [...leaderboard].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score
-    return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+async function fetchTotalPresses() {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_total_presses`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+    },
   })
 
-  const index = sorted.findIndex((entry) => entry.id === submittedId)
-
-  if (index === -1) return null
-
-  return {
-    position: index + 1,
-    entry: sorted[index],
+  if (!response.ok) {
+    throw new Error('Failed to fetch total presses.')
   }
+
+  return response.json()
 }
-const SiteFooter = React.memo(function SiteFooter() {
+
+const SiteFooter = React.memo(function SiteFooter({ totalPresses }) {
   return (
     <footer className="site-footer">
-  <div className="community-total">
-    All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
-  </div>
-  <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
-  <div className="footer-year">2026</div>
-</footer>
+      <div className="community-total">
+        All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
+      </div>
+      <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+      <div className="footer-year">2026</div>
+    </footer>
   )
 })
-function isInappropriateName(name) {
-  const normalized = name
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[@]/g, 'a')
-    .replace(/[4]/g, 'a')
-    .replace(/[3]/g, 'e')
-    .replace(/[1!|]/g, 'i')
-    .replace(/[0]/g, 'o')
-    .replace(/[5$]/g, 's')
-    .replace(/[7]/g, 't')
-    .replace(/[^a-z0-9]/g, '')
-
-  const blockedTerms = [
-    'fuck',
-    'fucking',
-    'shit',
-    'bitch',
-    'asshole',
-    'dick',
-    'cock',
-    'pussy',
-    'cunt',
-    'nigger',
-    'nigga',
-    'fag',
-    'faggot',
-    'slut',
-    'whore',
-    'porn',
-    'sex',
-    'rape',
-    'rapist',
-    'hitler',
-    'nazi',
-    'kkk',
-  ]
-
-  return blockedTerms.some((term) => normalized.includes(term))
-}
-function isBadDisplayName(name) {
-  const trimmed = name.trim()
-  if (trimmed.length < 2) return true
-
-  const visibleChars = trimmed.replace(/[^a-zA-Z0-9]/g, '')
-  if (visibleChars.length < 2) return true
-
-  return false
-}
 
 export default function App() {
   const [phase, setPhase] = useState('idle')
@@ -250,16 +216,19 @@ export default function App() {
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
   const cloudReady = isSupabaseConfigured()
-const playerPosition = useMemo(() => {
-  return getPlayerPosition(leaderboard, lastSubmittedId)
-}, [leaderboard, lastSubmittedId])
-  const communityTotal = useMemo(() => {
-  return leaderboard.reduce((sum, entry) => sum + (entry.score || 0), 0)
-}, [leaderboard])
 
-  useEffect(() => {
-    setIsMobileDevice(detectMobileDevice())
-  }, [])
+  const playerPosition = useMemo(() => {
+    return getPlayerPosition(leaderboard, lastSubmittedId)
+  }, [leaderboard, lastSubmittedId])
+
+  const flushScore = () => {
+    if (pendingPressesRef.current > 0) {
+      const amount = pendingPressesRef.current
+      pendingPressesRef.current = 0
+      setScore((prev) => prev + amount)
+    }
+    scoreFrameRef.current = null
+  }
 
   const loadLeaderboard = async () => {
     if (!cloudReady) {
@@ -273,23 +242,26 @@ const playerPosition = useMemo(() => {
       setLeaderboardError('')
       const rows = await fetchGlobalLeaderboard()
       setLeaderboard(Array.isArray(rows) ? rows : [])
-    } catch (error) {
+    } catch {
       setLeaderboardError('Could not load the online leaderboard.')
     } finally {
       setLeaderboardLoading(false)
     }
   }
-  const loadTotalPresses = async () => {
-  if (!cloudReady) return
 
-  try {
-    const total = await fetchTotalPresses()
-    setTotalPresses(Number(total) || 0)
-  } catch (error) {
-    console.error('Could not load total presses', error)
+  const loadTotalPresses = async () => {
+    if (!cloudReady) return
+    try {
+      const total = await fetchTotalPresses()
+      setTotalPresses(Number(total) || 0)
+    } catch (error) {
+      console.error('Could not load total presses', error)
+    }
   }
-}
-  
+
+  useEffect(() => {
+    setIsMobileDevice(detectMobileDevice())
+  }, [])
 
   useEffect(() => {
     loadLeaderboard()
@@ -310,12 +282,22 @@ const playerPosition = useMemo(() => {
   useEffect(() => {
     return () => {
       if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
+      if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
       if (countdownRef.current) clearInterval(countdownRef.current)
       if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
-      if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     }
   }, [])
 
+  const registerPress = (keyLabel) => {
+    if (phase !== 'playing') return
+
+    pendingPressesRef.current += 1
+    setLastKey(keyLabel)
+
+    if (!scoreFrameRef.current) {
+      scoreFrameRef.current = requestAnimationFrame(flushScore)
+    }
+  }
 
   useEffect(() => {
     if (phase !== 'playing') return
@@ -323,7 +305,6 @@ const playerPosition = useMemo(() => {
     const handleKeyDown = (e) => {
       const isShift = e.code === 'ShiftLeft' || e.code === 'ShiftRight'
       if (!isShift) return
-
       registerPress(e.code === 'ShiftLeft' ? 'LShift' : 'RShift')
     }
 
@@ -346,26 +327,6 @@ const playerPosition = useMemo(() => {
       if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
     }
   }, [phase])
-  
-  const flushScore = () => {
-  if (pendingPressesRef.current > 0) {
-    const amount = pendingPressesRef.current
-    pendingPressesRef.current = 0
-    setScore((prev) => prev + amount)
-  }
-  scoreFrameRef.current = null
-}
-
-  const registerPress = (keyLabel) => {
-  if (phase !== 'playing') return
-
-  pendingPressesRef.current += 1
-  setLastKey(keyLabel)
-
-  if (!scoreFrameRef.current) {
-    scoreFrameRef.current = requestAnimationFrame(flushScore)
-  }
-}
 
   const beginGame = () => {
     setScore(0)
@@ -375,6 +336,8 @@ const playerPosition = useMemo(() => {
     setCallout('Get ready...')
     setLastKey('-')
     setSavedThisRound(false)
+    setNameError('')
+    pendingPressesRef.current = 0
 
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
@@ -408,10 +371,12 @@ const playerPosition = useMemo(() => {
 
     gameTimerRef.current = requestAnimationFrame(tick)
   }
-  
 
   const finishGame = () => {
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
+    if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
+    flushScore()
+    pendingPressesRef.current = 0
     setTimeLeft(0)
     setPhase('finished')
     setCallout(score >= 300 ? 'That was wild.' : 'Nice run.')
@@ -419,9 +384,11 @@ const playerPosition = useMemo(() => {
 
   const resetGame = () => {
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
+    if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     if (countdownRef.current) clearInterval(countdownRef.current)
     if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
-    if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
+    scoreFrameRef.current = null
+    pendingPressesRef.current = 0
     setPhase('idle')
     setCountdown(PRE_COUNTDOWN)
     setTimeLeft(GAME_DURATION)
@@ -429,46 +396,42 @@ const playerPosition = useMemo(() => {
     setCallout('Ready to test your Shift speed?')
     setLastKey('-')
     setSavedThisRound(false)
+    setNameError('')
   }
 
-const submitScore = async () => {
-  const finalName = (nameDraft.trim() || playerName.trim() || 'Player').slice(0, 20)
-  setPlayerName(finalName)
+  const submitScore = async () => {
+    const finalName = (nameDraft.trim() || playerName.trim() || 'Player').slice(0, 20)
+    setPlayerName(finalName)
 
-  if (isBadDisplayName(finalName) || isInappropriateName(finalName)) {
-  setNameError('Please use an appropriate name with readable characters.')
-  return
-}
-
-  setNameError('')
-
-  if (!cloudReady) {
-    setLeaderboardError('Add your Supabase URL and anon key to enable the global leaderboard.')
-    return
-  }
-
-  try {
-    setLeaderboardError('')
-    const inserted = await insertGlobalScore(
-      finalName,
-      score,
-      isMobileDevice ? 'mobile' : 'desktop'
-    )
-
-    if (Array.isArray(inserted) && inserted.length > 0) {
-      setLastSubmittedId(inserted[0].id)
+    if (isBadDisplayName(finalName) || isInappropriateName(finalName)) {
+      setNameError('Please refrain from using inappropriate names!')
+      return
     }
 
-    setSavedThisRound(true)
-    await loadLeaderboard()
-    await loadTotalPresses()
-  } catch (error) {
-    setLeaderboardError('Could not save your score online.')
-  }
-}
+    setNameError('')
 
-  const mainDisplay =
-    phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
+    if (!cloudReady) {
+      setLeaderboardError('Add your Supabase URL and anon key to enable the global leaderboard.')
+      return
+    }
+
+    try {
+      setLeaderboardError('')
+      const inserted = await insertGlobalScore(finalName, score, isMobileDevice ? 'mobile' : 'desktop')
+
+      if (Array.isArray(inserted) && inserted.length > 0) {
+        setLastSubmittedId(inserted[0].id)
+      }
+
+      setSavedThisRound(true)
+      await loadLeaderboard()
+      await loadTotalPresses()
+    } catch {
+      setLeaderboardError('Could not save your score online.')
+    }
+  }
+
+  const mainDisplay = phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
 
   return (
     <div className="app-shell">
@@ -485,64 +448,58 @@ const submitScore = async () => {
                 </div>
 
                 <div className="rank-badge-wrap">
-  <div className="rank-badge">
-    <div className="label-small">Current Rank</div>
-    <div className={`rank-text ${rank.textClass}`}>{rank.label}</div>
-  </div>
+                  <div className="rank-badge">
+                    <div className="label-small">Current Rank</div>
+                    <div className={`rank-text ${rank.textClass}`}>{rank.label}</div>
+                  </div>
 
-  <div className="rank-info">
-    <button className="rank-info-button" type="button" aria-label="Rank info">
-      i
-    </button>
+                  <div className="rank-info">
+                    <button className="rank-info-button" type="button" aria-label="Rank info">
+                      i
+                    </button>
 
-    <div className="rank-info-popover">
-      <div className="rank-info-title">Rank Values</div>
+                    <div className="rank-info-popover">
+                      <div className="rank-info-title">Rank Values</div>
 
-<div className="rank-info-row rank-info-row-note">
-  <div>
-    <span className="rank-info-name rank-hacker">Hacker</span>
-    <div className="rank-info-subnote">you probably used a bot huh</div>
-  </div>
-  <span className="rank-info-range">700+</span>
-</div>
+                      <div className="rank-info-row rank-info-row-note">
+                        <div>
+                          <span className="rank-info-name rank-hacker">Hacker</span>
+                          <div className="rank-info-subnote">you probably used a bot huh</div>
+                        </div>
+                        <span className="rank-info-range">700+</span>
+                      </div>
 
-<div className="rank-info-row">
-  <span className="rank-info-name rank-radiant">Radiant</span>
-  <span className="rank-info-range">600–699</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-legendary">Legendary</span>
-  <span className="rank-info-range">500–599</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-grandmaster">Grandmaster</span>
-  <span className="rank-info-range">400–499</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-master">Master</span>
-  <span className="rank-info-range">300–399</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-pro">Pro</span>
-  <span className="rank-info-range">200–299</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-rookie">Rookie</span>
-  <span className="rank-info-range">100–199</span>
-</div>
-
-<div className="rank-info-row">
-  <span className="rank-info-name rank-noob">Noob</span>
-  <span className="rank-info-range">0–99</span>
-</div>
-    </div>
-  </div>
-</div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-radiant">Radiant</span>
+                        <span className="rank-info-range">600–699</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-legendary">Legendary</span>
+                        <span className="rank-info-range">500–599</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-grandmaster">Grandmaster</span>
+                        <span className="rank-info-range">400–499</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-master">Master</span>
+                        <span className="rank-info-range">300–399</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-pro">Pro</span>
+                        <span className="rank-info-range">200–299</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-rookie">Rookie</span>
+                        <span className="rank-info-range">100–199</span>
+                      </div>
+                      <div className="rank-info-row">
+                        <span className="rank-info-name rank-noob">Noob</span>
+                        <span className="rank-info-range">0–99</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="stats-grid">
@@ -558,11 +515,7 @@ const submitScore = async () => {
               </div>
 
               <div className={`callout-box ${rank.borderClass}`}>
-                <div
-                  className={`callout-score ${
-                    phase === 'countdown' ? 'countdown-score' : rank.textClass
-                  }`}
-                >
+                <div className={`callout-score ${phase === 'countdown' ? 'countdown-score' : rank.textClass}`}>
                   {mainDisplay}
                 </div>
               </div>
@@ -606,7 +559,9 @@ const submitScore = async () => {
                 </button>
 
                 <div className="info-box">
-                  Mash your keys and try to earn a top spot on the global leaderboard. ARE YOU FAST ENOUGH?
+                  Objective: press LShift and RShift as fast as possible for 20 seconds and try to
+                  earn a top spot on the global leaderboard. Each leaderboard entry shows the
+                  player’s score and keys per minute.
                 </div>
               </div>
 
@@ -623,16 +578,18 @@ const submitScore = async () => {
 
                     <div className="name-area">
                       <input
-  className="text-input"
-  value={nameDraft}
-  onChange={(e) => {
-    setNameDraft(e.target.value)
-    if (nameError) setNameError('')
-  }}
-  placeholder="Enter a name for the leaderboard"
-  maxLength={20}
-/>
-                      {nameError && <div className="name-error-text">Please use an appropriate name with readable characters.</div>}
+                        className="text-input"
+                        value={nameDraft}
+                        onChange={(e) => {
+                          setNameDraft(e.target.value)
+                          if (nameError) setNameError('')
+                        }}
+                        placeholder="Enter a name for the leaderboard"
+                        maxLength={20}
+                      />
+                      {nameError && (
+                        <div className="name-error-text">Please refrain from using inappropriate names!</div>
+                      )}
                       <button
                         className="button button-success"
                         onClick={submitScore}
@@ -664,68 +621,68 @@ const submitScore = async () => {
 
               {leaderboardError && <div className="error-box">{leaderboardError}</div>}
 
-             <div className="leaderboard-scroll">
-  <div className="leaderboard-list">
-    {leaderboardLoading ? (
-      <div className="empty-box">Loading leaderboard...</div>
-    ) : leaderboard.length === 0 ? (
-      <div className="empty-box">No global scores yet. Be the first.</div>
-    ) : (
-      leaderboard.map((entry, index) => {
-        const entryRank = getRank(entry.score)
-        const deviceIcon = getDeviceIcon(entry.device_type)
-        const keysPerMinute = Math.round(entry.score * 3)
+              <div className="leaderboard-scroll">
+                <div className="leaderboard-list">
+                  {leaderboardLoading ? (
+                    <div className="empty-box">Loading leaderboard...</div>
+                  ) : leaderboard.length === 0 ? (
+                    <div className="empty-box">No global scores yet. Be the first.</div>
+                  ) : (
+                    leaderboard.map((entry, index) => {
+                      const entryRank = getRank(entry.score)
+                      const deviceIcon = getDeviceIcon(entry.device_type)
+                      const keysPerMinute = Math.round(entry.score * 3)
 
-        return (
-          <div
-            key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
-            className={`leaderboard-item ${entryRank.borderClass}`}
-          >
-            <div className="space-between">
-              <div>
-                <div className="place">
-                  #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                      return (
+                        <div
+                          key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
+                          className={`leaderboard-item ${entryRank.borderClass}`}
+                        >
+                          <div className="space-between">
+                            <div>
+                              <div className="place">
+                                #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                              </div>
+                              <div className="player-name">{entry.name}</div>
+                              <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
+                              <div className="player-kpm">{keysPerMinute} keys/min</div>
+                            </div>
+
+                            <div className={`player-score score-animated ${entryRank.textClass}`}>
+                              {entry.score}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
-                <div className="player-name">{entry.name}</div>
-                <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
-                <div className="player-kpm">{keysPerMinute} keys/min</div>
               </div>
 
-              <div className={`player-score score-animated ${entryRank.textClass}`}>{entry.score}</div>
-            </div>
-          </div>
-        )
-      })
-    )}
-  </div>
-</div>
-
-<div className="player-position-card">
-  <div className="player-position-title">Your Position</div>
-  {playerPosition ? (
-    <div className="player-position-row">
-      <div>
-        <div className="player-position-place">#{playerPosition.position}</div>
-        <div className="player-position-name">{playerPosition.entry.name}</div>
-        <div className="player-position-kpm">
-          {Math.round(playerPosition.entry.score * 3)} keys/min
-        </div>
-      </div>
-      <div className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}>
-  {playerPosition.entry.score}
-</div>
-    </div>
-  ) : (
-    <div className="player-position-empty">
-      Save a score to see your position here.
-    </div>
-  )}
-</div>
+              <div className="player-position-card">
+                <div className="player-position-title">Your Position</div>
+                {playerPosition ? (
+                  <div className="player-position-row">
+                    <div>
+                      <div className="player-position-place">#{playerPosition.position}</div>
+                      <div className="player-position-name">{playerPosition.entry.name}</div>
+                      <div className="player-position-kpm">
+                        {Math.round(playerPosition.entry.score * 3)} keys/min
+                      </div>
+                    </div>
+                    <div className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}>
+                      {playerPosition.entry.score}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="player-position-empty">Save a score to see your position here.</div>
+                )}
+              </div>
             </div>
           </aside>
         </div>
 
-        <SiteFooter />
+        <SiteFooter totalPresses={totalPresses} />
       </div>
     </div>
   )
