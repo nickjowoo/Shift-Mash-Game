@@ -406,6 +406,13 @@ input {
 .text-input:focus {
   border-color: #67e8f9;
 }
+.name-error-text {
+  margin: -2px 0 8px;
+  font-size: 0.62rem;
+  color: #f87171;
+  font-weight: 700;
+  line-height: 1.2;
+}
 
 .side-title {
   margin: 0;
