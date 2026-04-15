@@ -360,10 +360,57 @@ const submitScore = async () => {
                   </p>
                 </div>
 
-                <div className="rank-badge">
-                  <div className="label-small">Current Rank</div>
-                  <div className={`rank-text ${rank.textClass}`}>{rank.label}</div>
-                </div>
+                <div className="rank-badge-wrap">
+  <div className="rank-badge">
+    <div className="label-small">Current Rank</div>
+    <div className={`rank-text ${rank.textClass}`}>{rank.label}</div>
+  </div>
+
+  <div className="rank-info">
+    <button className="rank-info-button" type="button" aria-label="Rank info">
+      i
+    </button>
+
+    <div className="rank-info-popover">
+      <div className="rank-info-title">Rank Values</div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-noob">Noob</span>
+        <span className="rank-info-range">0–99</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-rookie">Rookie</span>
+        <span className="rank-info-range">100–199</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-pro">Pro</span>
+        <span className="rank-info-range">200–299</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-master">Master</span>
+        <span className="rank-info-range">300–399</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-grandmaster">Grandmaster</span>
+        <span className="rank-info-range">400–499</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-legendary">Legendary</span>
+        <span className="rank-info-range">500–599</span>
+      </div>
+
+      <div className="rank-info-row">
+        <span className="rank-info-name rank-radiant">Radiant</span>
+        <span className="rank-info-range">600+</span>
+      </div>
+    </div>
+  </div>
+</div>
               </div>
 
               <div className="stats-grid">
