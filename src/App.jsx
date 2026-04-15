@@ -123,7 +123,25 @@ async function insertGlobalScore(name, score, deviceType) {
     body: JSON.stringify([{ name, score, device_type: deviceType }]),
   })
 }
+function getPlayerPosition(leaderboard, playerName, playerScore) {
+  if (!playerName) return null
 
+  const sorted = [...leaderboard].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+  })
+
+  const index = sorted.findIndex(
+    (entry) => entry.name === playerName && entry.score === playerScore
+  )
+
+  if (index === -1) return null
+
+  return {
+    position: index + 1,
+    entry: sorted[index],
+  }
+}
 export default function App() {
   const [phase, setPhase] = useState('idle')
   const [countdown, setCountdown] = useState(PRE_COUNTDOWN)
@@ -149,6 +167,9 @@ export default function App() {
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
   const cloudReady = isSupabaseConfigured()
+  const playerPosition = useMemo(() => {
+  return getPlayerPosition(leaderboard, playerName, score)
+}, [leaderboard, playerName, score])
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
@@ -471,39 +492,63 @@ export default function App() {
 
               {leaderboardError && <div className="error-box">{leaderboardError}</div>}
 
-              <div className="leaderboard-list">
-                {leaderboardLoading ? (
-                  <div className="empty-box">Loading leaderboard...</div>
-                ) : leaderboard.length === 0 ? (
-                  <div className="empty-box">No global scores yet. Be the first.</div>
-                ) : (
-                  leaderboard.map((entry, index) => {
-                    const entryRank = getRank(entry.score)
-                    const deviceIcon = getDeviceIcon(entry.device_type)
-                    const keysPerMinute = Math.round(entry.score * 3)
+             <div className="leaderboard-scroll">
+  <div className="leaderboard-list">
+    {leaderboardLoading ? (
+      <div className="empty-box">Loading leaderboard...</div>
+    ) : leaderboard.length === 0 ? (
+      <div className="empty-box">No global scores yet. Be the first.</div>
+    ) : (
+      leaderboard.map((entry, index) => {
+        const entryRank = getRank(entry.score)
+        const deviceIcon = getDeviceIcon(entry.device_type)
+        const keysPerMinute = Math.round(entry.score * 3)
 
-                    return (
-                      <div
-                        key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
-                        className={`leaderboard-item ${entryRank.borderClass}`}
-                      >
-                        <div className="space-between">
-                          <div>
-                            <div className="place">
-                              #{index + 1} <span className="device-icon">{deviceIcon}</span>
-                            </div>
-                            <div className="player-name">{entry.name}</div>
-                            <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
-                            <div className="player-kpm">{keysPerMinute} keys/min</div>
-                          </div>
-
-                          <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
+        return (
+          <div
+            key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
+            className={`leaderboard-item ${entryRank.borderClass}`}
+          >
+            <div className="space-between">
+              <div>
+                <div className="place">
+                  #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                </div>
+                <div className="player-name">{entry.name}</div>
+                <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
+                <div className="player-kpm">{keysPerMinute} keys/min</div>
               </div>
+
+              <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
+            </div>
+          </div>
+        )
+      })
+    )}
+  </div>
+</div>
+
+<div className="player-position-card">
+  <div className="player-position-title">Your Position</div>
+  {playerPosition ? (
+    <div className="player-position-row">
+      <div>
+        <div className="player-position-place">#{playerPosition.position}</div>
+        <div className="player-position-name">{playerPosition.entry.name}</div>
+        <div className="player-position-kpm">
+          {Math.round(playerPosition.entry.score * 3)} keys/min
+        </div>
+      </div>
+      <div className={`player-position-score ${getRank(playerPosition.entry.score).textClass}`}>
+        {playerPosition.entry.score}
+      </div>
+    </div>
+  ) : (
+    <div className="player-position-empty">
+      Save a score to see your position here.
+    </div>
+  )}
+</div>
             </div>
           </aside>
         </div>
