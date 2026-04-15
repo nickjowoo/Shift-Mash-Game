@@ -651,17 +651,18 @@ const [adminError, setAdminError] = useState('')
             <button
               className="button button-primary"
               type="button"
-              onClick={async () => {
-                try {
-                  await updateAnnouncement(adminPassword, announcementDraft)
-                  setAnnouncement(announcementDraft)
-                  setShowAnnouncementEditor(false)
-                  setAdminError('')
-                  localStorage.setItem('announcement_admin_unlocked', 'true')
-                } catch (err) {
-                  setAdminError('Wrong password or failed to update announcement.')
-                }
-              }}
+              oonClick={async () => {
+  try {
+    setAdminError('')
+
+    await updateAnnouncement(adminPassword, announcementDraft)
+
+    setAnnouncement(announcementDraft)
+    setShowAnnouncementEditor(false)
+  } catch (err) {
+    setAdminError('Wrong password or failed to update announcement.')
+  }
+}}
             >
               Enter
             </button>
