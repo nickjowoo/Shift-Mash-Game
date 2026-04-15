@@ -112,7 +112,7 @@ async function fetchGlobalLeaderboard() {
   const query =
     `${SUPABASE_TABLE}?select=id,name,score,created_at,device_type` +
     `&created_at=gte.${encodeURIComponent(cycleStart)}` +
-    `&order=score.desc,created_at.asc&limit=${MAX_LEADERBOARD}`
+    `&order=score.desc,created_at.asc`
 
   return supabaseRequest(query, { method: 'GET' })
 }
@@ -123,17 +123,15 @@ async function insertGlobalScore(name, score, deviceType) {
     body: JSON.stringify([{ name, score, device_type: deviceType }]),
   })
 }
-function getPlayerPosition(leaderboard, playerName, playerScore) {
-  if (!playerName) return null
+function getPlayerPosition(leaderboard, submittedId) {
+  if (!submittedId) return null
 
   const sorted = [...leaderboard].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score
     return new Date(a.created_at || 0) - new Date(b.created_at || 0)
   })
 
-  const index = sorted.findIndex(
-    (entry) => entry.name === playerName && entry.score === playerScore
-  )
+  const index = sorted.findIndex((entry) => entry.id === submittedId)
 
   if (index === -1) return null
 
@@ -158,6 +156,7 @@ export default function App() {
   const [resetCountdown, setResetCountdown] = useState('')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [showIntro, setShowIntro] = useState(true)
+  const [lastSubmittedId, setLastSubmittedId] = useState(null)
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -167,9 +166,9 @@ export default function App() {
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
   const cloudReady = isSupabaseConfigured()
-  const playerPosition = useMemo(() => {
-  return getPlayerPosition(leaderboard, playerName, score)
-}, [leaderboard, playerName, score])
+const playerPosition = useMemo(() => {
+  return getPlayerPosition(leaderboard, lastSubmittedId)
+}, [leaderboard, lastSubmittedId])
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
@@ -324,24 +323,33 @@ export default function App() {
     setSavedThisRound(false)
   }
 
-  const submitScore = async () => {
-    const finalName = nameDraft.trim() || playerName.trim() || 'Player'
-    setPlayerName(finalName)
+const submitScore = async () => {
+  const finalName = nameDraft.trim() || playerName.trim() || 'Player'
+  setPlayerName(finalName)
 
-    if (!cloudReady) {
-      setLeaderboardError('Add your Supabase URL and anon key to enable the global leaderboard.')
-      return
-    }
-
-    try {
-      setLeaderboardError('')
-      await insertGlobalScore(finalName, score, isMobileDevice ? 'mobile' : 'desktop')
-      setSavedThisRound(true)
-      await loadLeaderboard()
-    } catch (error) {
-      setLeaderboardError('Could not save your score online.')
-    }
+  if (!cloudReady) {
+    setLeaderboardError('Add your Supabase URL and anon key to enable the global leaderboard.')
+    return
   }
+
+  try {
+    setLeaderboardError('')
+    const inserted = await insertGlobalScore(
+      finalName,
+      score,
+      isMobileDevice ? 'mobile' : 'desktop'
+    )
+
+    if (Array.isArray(inserted) && inserted.length > 0) {
+      setLastSubmittedId(inserted[0].id)
+    }
+
+    setSavedThisRound(true)
+    await loadLeaderboard()
+  } catch (error) {
+    setLeaderboardError('Could not save your score online.')
+  }
+}
 
   const mainDisplay =
     phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
