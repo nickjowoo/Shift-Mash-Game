@@ -475,9 +475,6 @@ input {
   color: #ffffff;
 }
 
-.rank-rookie {
-  color: #cbd5e1;
-}
 
 .rank-pro {
   color: #67e8f9;
@@ -517,8 +514,25 @@ input {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+.rank-noob {
+  color: #9ca3af;
+}
+
+.rank-rookie {
+  background: linear-gradient(90deg, #cd7f32, #b87333, #e0a96d, #a65a2e);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.border-noob {
+  border-color: rgba(156, 163, 175, 0.45);
+}
+
 .border-rookie {
-  border-color: rgba(148, 163, 184, 0.45);
+  border-color: rgba(205, 127, 50, 0.55);
 }
 
 .border-pro {
