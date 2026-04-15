@@ -366,6 +366,12 @@ input {
   font-size: 0.72rem;
   margin-top: 2px;
 }
+.player-kpm {
+  font-size: 0.68rem;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-weight: 600;
+}
 
 .player-score {
   font-size: 1.35rem;
