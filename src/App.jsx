@@ -577,9 +577,7 @@ export default function App() {
                 </button>
 
                 <div className="info-box">
-                  Objective: press LShift and RShift as fast as possible for 20 seconds and try to
-                  earn a top spot on the global leaderboard. Each leaderboard entry shows the
-                  player’s score and keys per minute.
+                  Warm-up. Key mashing is encouraged. Try to earn a top spot on the global leaderboard. Are you fast enough?
                 </div>
               </div>
 
