@@ -98,6 +98,85 @@ input {
   background: rgba(59, 130, 246, 0.12);
   text-align: right;
 }
+.rank-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rank-info {
+  position: relative;
+}
+
+.rank-info-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.rank-info-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.rank-info-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.97);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 40;
+}
+
+.rank-info:hover .rank-info-popover,
+.rank-info:focus-within .rank-info-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.rank-info-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.rank-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.rank-info-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.rank-info-range {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
 
 .label-small {
   text-transform: uppercase;
