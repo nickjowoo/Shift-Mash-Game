@@ -405,6 +405,25 @@ input {
   background-clip: text;
   color: transparent;
 }
+.site-footer {
+  margin-top: 18px;
+  text-align: center;
+  color: #cbd5e1;
+  opacity: 0.9;
+}
+
+.footer-credit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.footer-year {
+  margin-top: 4px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
 
 .rank-radiant {
   background: linear-gradient(90deg, #ff0040, #ff7b00, #ffee00, #00ff85, #00c2ff, #7a5cff, #ff00b3);
@@ -442,6 +461,7 @@ input {
 .border-radiant {
   border-color: rgba(232, 121, 249, 0.7);
 }
+
 
 @keyframes gradient {
   0% {
