@@ -256,7 +256,14 @@ input {
   background: rgba(30, 41, 59, 0.45);
   overflow: hidden;
 }
-
+.callout-label {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  color: #cbd5e1;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
 .callout-score {
   font-size: clamp(2.7rem, 6vw, 4.7rem);
   font-weight: 900;
