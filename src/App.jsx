@@ -353,7 +353,7 @@ export default function App() {
                 </button>
 
                 <div className="info-box">
-                  Press both Shift keys as fast as you want. Key mashing is fully allowed. Think you can beat Nick?
+                  Press both Shift keys as fast as you want. Key mashing is fully allowed. ARE YOU FAST ENUFF?
                 </div>
               </div>
 
