@@ -382,7 +382,11 @@ export default function App() {
               <div className="leaderboard-head">
                 <div>
                   <h2 className="side-title">Global Leaderboard</h2>
-                  <div className="side-subtitle">Shared by everyone using your deployed game link.</div>
+                  <div className="side-subtitle">
+  Made by Nick W., Kyle S., Felipe L.P.
+  <br />
+  <span className="reset-text">Resets in {resetCountdown}</span>
+</div>
                 </div>
                 <button className="button button-secondary" onClick={loadLeaderboard}>
                   Refresh
