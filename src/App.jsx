@@ -210,18 +210,18 @@ async function verifyAnnouncementPassword(password) {
     },
     body: JSON.stringify({
       action: 'verify',
-      password,
+      password: password.trim(),
     }),
   })
 
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data?.error || 'Password verification failed')
+    throw new Error(data?.error || `Password verification failed (${response.status})`)
   }
 
   if (!data?.token || typeof data.token !== 'string') {
-    throw new Error('Verify succeeded, but no admin token was returned by the Edge Function.')
+    throw new Error('Password was accepted, but no admin token was returned.')
   }
 
   return data.token
@@ -237,14 +237,14 @@ async function updateAnnouncement(adminToken, message) {
     },
     body: JSON.stringify({
       action: 'update',
-      message,
+      message: message.trim(),
     }),
   })
 
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data?.error || 'Failed to update announcement')
+    throw new Error(data?.error || `Failed to update announcement (${response.status})`)
   }
 
   return data
