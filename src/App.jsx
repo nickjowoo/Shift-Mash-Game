@@ -353,7 +353,7 @@ export default function App() {
                 </button>
 
                 <div className="info-box">
-                  Press both Shift keys as fast as you want. Key mashing is fully allowed. Try to earn a top spot on the global leaderboard! Each leaderboard entry shows the player’s score and keys per minute, think you can beat Nick?
+                  Press both Shift keys as fast as you want. Key mashing is fully allowed. Think you can beat Nick?
                 </div>
               </div>
 
