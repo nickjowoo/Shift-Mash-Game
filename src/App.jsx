@@ -28,7 +28,7 @@ const RANKS = [
   { min: 300, label: 'Master', textClass: 'rank-master', borderClass: 'border-master' },
   { min: 200, label: 'Pro', textClass: 'rank-pro', borderClass: 'border-pro' },
   { min: 100, label: 'Rookie', textClass: 'rank-rookie', borderClass: 'border-rookie' },
-  { min: 0, label: 'Unranked', textClass: 'rank-unranked', borderClass: 'border-unranked' },
+  { min: 0, label: 'Noob', textClass: 'rank-noob', borderClass: 'border-noob' },
 ]
 
 function getRank(score) {
