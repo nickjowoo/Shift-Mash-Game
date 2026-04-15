@@ -337,8 +337,6 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
     setIsMobileDevice(detectMobileDevice())
   }, [])
   useEffect(() => {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
   const initAnnouncement = async () => {
     try {
       const message = await fetchAnnouncement()
@@ -351,20 +349,16 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
 
   initAnnouncement()
 
-  const channel = supabase
-    .channel('announcements-live')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'announcements' },
-      (payload) => {
-        if (payload?.new?.message) {
-          setAnnouncement(payload.new.message)
-        }
-      }
-    )
-    .subscribe()
+  const interval = setInterval(async () => {
+    try {
+      const message = await fetchAnnouncement()
+      setAnnouncement(message)
+    } catch (err) {
+      console.error('Could not poll announcement', err)
+    }
+  }, 10000)
 
-  return () => supabase.removeChannel(channel)
+  return () => clearInterval(interval)
 }, [])
 
   useEffect(() => {
