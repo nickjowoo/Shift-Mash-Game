@@ -646,7 +646,7 @@ input {
 .rank-radiant {
   background: linear-gradient(90deg, #ff0040, #ff7b00, #ffee00, #00ff85, #00c2ff, #7a5cff, #ff00b3);
   background-size: 260% 100%;
-  animation: shineLoop 2.4s linear infinite;
+  animation: shineLoop 3.4s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -655,7 +655,7 @@ input {
 .rank-hacker {
   background: linear-gradient(90deg, #7cff7c, #00ff66, #0b0b0b, #39ff14, #0f0f0f, #7cff7c);
   background-size: 240% 100%;
-  animation: shineLoop 2s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
+  animation: shineLoop 3.2s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
