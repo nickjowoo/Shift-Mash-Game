@@ -201,8 +201,7 @@ async function fetchAnnouncement() {
   const rows = await response.json()
   return rows?.[0]?.message || 'Welcome to Shift Mash Arena.'
 }
-
-async function updateAnnouncement(password, message) {
+async function verifyAnnouncementPassword(password) {
   const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
     method: 'POST',
     headers: {
@@ -210,7 +209,33 @@ async function updateAnnouncement(password, message) {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     },
-    body: JSON.stringify({ password, message }),
+    body: JSON.stringify({
+      action: 'verify',
+      password,
+    }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(data?.error || 'Password verification failed')
+  }
+
+  return data
+}
+
+async function updateAnnouncement(adminToken, message) {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${adminToken}`,
+    },
+    body: JSON.stringify({
+      action: 'update',
+      message,
+    }),
   })
 
   const data = await response.json().catch(() => ({}))
@@ -247,6 +272,7 @@ const [showAnnouncementEditor, setShowAnnouncementEditor] = useState(false)
 const [adminPassword, setAdminPassword] = useState('')
 const [announcementDraft, setAnnouncementDraft] = useState('')
 const [adminError, setAdminError] = useState('')
+  const [adminToken, setAdminToken] = useState(localStorage.getItem('announcement_admin_token') || '')
   
 
   const gameTimerRef = useRef(null)
@@ -607,15 +633,26 @@ const [adminError, setAdminError] = useState('')
             <button
               className="button button-primary"
               type="button"
-              onClick={() => {
-                if (!adminPassword.trim()) {
-                  setAdminError('Enter the admin password.')
-                  return
-                }
-                setAdminError('')
-                setShowAdminLogin(false)
-                setShowAnnouncementEditor(true)
-              }}
+              onClick={async () => {
+  try {
+    if (!adminPassword.trim()) {
+      setAdminError('Enter the admin password.')
+      return
+    }
+
+    setAdminError('')
+
+    const result = await verifyAnnouncementPassword(adminPassword)
+
+    setAdminToken(result.token)
+    localStorage.setItem('announcement_admin_token', result.token)
+
+    setShowAdminLogin(false)
+    setShowAnnouncementEditor(true)
+  } catch (err) {
+    setAdminError('Wrong password.')
+  }
+}}
             >
               Enter
             </button>
@@ -651,16 +688,43 @@ const [adminError, setAdminError] = useState('')
             <button
               className="button button-primary"
               type="button"
-              oonClick={async () => {
+              onClick={async () => {
   try {
+    if (!announcementDraft.trim()) {
+      setAdminError('Announcement cannot be empty.')
+      return
+    }
+
+    if (!adminToken) {
+      setAdminError('Admin session expired. Enter the password again.')
+      setShowAnnouncementEditor(false)
+      setShowAdminLogin(true)
+      return
+    }
+
     setAdminError('')
 
-    await updateAnnouncement(adminPassword, announcementDraft)
+    await updateAnnouncement(adminToken, announcementDraft)
 
     setAnnouncement(announcementDraft)
     setShowAnnouncementEditor(false)
   } catch (err) {
-    setAdminError('Wrong password or failed to update announcement.')
+    const message = err?.message || 'Failed to update announcement.'
+
+    if (
+      message.includes('expired') ||
+      message.includes('Invalid or expired admin token') ||
+      message.includes('Missing admin token')
+    ) {
+      localStorage.removeItem('announcement_admin_token')
+      setAdminToken('')
+      setShowAnnouncementEditor(false)
+      setShowAdminLogin(true)
+      setAdminError('Admin session expired. Enter the password again.')
+      return
+    }
+
+    setAdminError(message)
   }
 }}
             >
