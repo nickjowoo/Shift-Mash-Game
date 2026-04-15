@@ -871,6 +871,22 @@ input {
   font-weight: 700;
 }
 
+.admin-input-success {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+}
+
+.announcement-editor-disabled {
+  opacity: 0.55;
+  filter: grayscale(0.15);
+  cursor: not-allowed;
+}
+
+.announcement-editor-enabled {
+  opacity: 1;
+  cursor: text;
+}
+
 @keyframes gradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
