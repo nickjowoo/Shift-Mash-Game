@@ -213,12 +213,13 @@ async function updateAnnouncement(password, message) {
     body: JSON.stringify({ password, message }),
   })
 
+  const data = await response.json().catch(() => ({}))
+
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}))
     throw new Error(data?.error || 'Failed to update announcement')
   }
 
-  return response.json()
+  return data
 }
 
 export default function App() {
