@@ -635,55 +635,36 @@ const [adminToken, setAdminToken] = useState('')
             />
             {adminError && <div className="name-error-text">{adminError}</div>}
             <button
-              className="button button-primary"
-              type="button"
-              onClick={async () => {
-  try {
-    const trimmedAnnouncement = announcementDraft.trim()
+  className="button button-primary"
+  type="button"
+  onClick={async () => {
+    try {
+      const trimmedPassword = adminPassword.trim()
 
-    if (!trimmedAnnouncement) {
-      setAdminError('Announcement cannot be empty.')
-      return
+      if (!trimmedPassword) {
+        setAdminError('Enter the admin password.')
+        return
+      }
+
+      setAdminError('')
+
+      const token = await verifyAnnouncementPassword(trimmedPassword)
+
+      setAdminToken(token)
+      setAdminPassword('')
+      setShowAdminLogin(false)
+      setShowAnnouncementEditor(true)
+      setAnnouncementDraft(announcement)
+    } catch (err) {
+      setAdminToken('')
+      setAdminError(
+        err instanceof Error ? err.message : 'Password verification failed'
+      )
     }
-
-    if (!adminToken) {
-      setAdminError('Enter the admin password first.')
-      setShowAnnouncementEditor(false)
-      setShowAdminLogin(true)
-      return
-    }
-
-    setAdminError('')
-
-    await updateAnnouncement(adminToken, trimmedAnnouncement)
-
-    setAnnouncement(trimmedAnnouncement)
-    setAnnouncementDraft(trimmedAnnouncement)
-    setShowAnnouncementEditor(false)
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to update announcement.'
-
-    setAdminToken('')
-
-    if (
-      message.includes('expired') ||
-      message.includes('Invalid') ||
-      message.includes('Missing admin token') ||
-      message.includes('Unauthorized')
-    ) {
-      setShowAnnouncementEditor(false)
-      setShowAdminLogin(true)
-      setAdminError(message)
-      return
-    }
-
-    setAdminError(message)
-  }
-}}
-            >
-              Enter
-            </button>
+  }}
+>
+  Enter
+</button>
           </div>
         </div>
       </div>
