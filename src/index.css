@@ -185,6 +185,17 @@ input {
   gap: 10px;
   padding: 4px 0;
 }
+.rank-flash {
+  animation: rankPop 0.6s ease-out forwards;
+}
+
+@keyframes rankPop {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.06); }
+  50%  { transform: scale(0.97); }
+  75%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
 
 .rank-info-row-note {
   align-items: flex-start;
