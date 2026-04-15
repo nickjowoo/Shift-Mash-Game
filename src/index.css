@@ -172,6 +172,17 @@ input {
   font-size: 0.78rem;
   font-weight: 800;
 }
+.rank-info-subnote {
+  margin-top: 2px;
+  font-size: 0.6rem;
+  color: #86efac;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.rank-info-row-note {
+  align-items: flex-start;
+}
 
 .rank-info-range {
   font-size: 0.72rem;
