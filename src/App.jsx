@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
 const MAX_LEADERBOARD = 10
+const RESET_HOURS = 48
+const RESET_MS = RESET_HOURS * 60 * 60 * 1000
 
 const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_SbcuqjkKm40oS6iA5bWBog_8xkxhFrP'
@@ -71,7 +73,12 @@ async function supabaseRequest(path, options = {}) {
 }
 
 async function fetchGlobalLeaderboard() {
-  const query = `${SUPABASE_TABLE}?select=id,name,score,created_at&order=score.desc,created_at.asc&limit=${MAX_LEADERBOARD}`
+  const cycleStart = new Date(getCurrentCycleStart()).toISOString()
+  const query =
+    `${SUPABASE_TABLE}?select=id,name,score,created_at` +
+    `&created_at=gte.${encodeURIComponent(cycleStart)}` +
+    `&order=score.desc,created_at.asc&limit=${MAX_LEADERBOARD}`
+
   return supabaseRequest(query, { method: 'GET' })
 }
 
@@ -80,6 +87,24 @@ async function insertGlobalScore(name, score) {
     method: 'POST',
     body: JSON.stringify([{ name, score }])
   })
+}
+function getCurrentCycleStart() {
+  const now = Date.now()
+  return Math.floor(now / RESET_MS) * RESET_MS
+}
+
+function getNextResetTime() {
+  return getCurrentCycleStart() + RESET_MS
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 export default function App() {
@@ -95,6 +120,7 @@ export default function App() {
   const [savedThisRound, setSavedThisRound] = useState(false)
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardError, setLeaderboardError] = useState('')
+  const [resetCountdown, setResetCountdown] = useState('')
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -127,6 +153,17 @@ export default function App() {
   useEffect(() => {
     loadLeaderboard()
   }, [])
+
+  useEffect(() => {
+  const updateCountdown = () => {
+    const remaining = getNextResetTime() - Date.now()
+    setResetCountdown(formatCountdown(remaining))
+  }
+
+  updateCountdown()
+  const interval = setInterval(updateCountdown, 1000)
+  return () => clearInterval(interval)
+}, [])
 
   useEffect(() => {
     return () => {
