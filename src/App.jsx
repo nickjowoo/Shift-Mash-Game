@@ -733,32 +733,42 @@ export default function App() {
                   )}
                 </div>
               </div>
-
-              <div className="player-position-card">
+              <div
+  className={`player-position-card ${
+    playerPosition?.position === 1
+      ? 'border-gold'
+      : playerPosition?.position === 2
+      ? 'border-silver'
+      : playerPosition?.position === 3
+      ? 'border-bronze'
+      : ''
+  }`}
+>
   <div className="player-position-title">Your Position</div>
   {playerPosition ? (
     <div className="player-position-row">
-                <div className="player-position-title">Your Position</div>
-                {playerPosition ? (
-                  <div className="player-position-row">
-                    <div>
-                      <div className="player-position-place">#{playerPosition.position}</div>
-                      <div className="player-position-name">{playerPosition.entry.name}</div>
-                      <div className="player-position-kpm">
-                        {Math.round(playerPosition.entry.score * 3)} keys/min
-                      </div>
-                    </div>
-                    <div className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}>
-                      {playerPosition.entry.score}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="player-position-empty">Save a score to see your position here.</div>
-                )}
-              </div>
-            </div>
-          </aside>
+      <div>
+        <div className="player-position-place">
+          {playerPosition.position === 1 && '🥇 '}
+          {playerPosition.position === 2 && '🥈 '}
+          {playerPosition.position === 3 && '🥉 '}
+          #{playerPosition.position}
         </div>
+        <div className="player-position-name">{playerPosition.entry.name}</div>
+        <div className="player-position-kpm">
+          {Math.round(playerPosition.entry.score * 3)} keys/min
+        </div>
+      </div>
+      <div
+        className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}
+      >
+        {playerPosition.entry.score}
+      </div>
+    </div>
+  ) : (
+    <div className="player-position-empty">Save a score to see your position here.</div>
+  )}
+</div>
 
         <footer className="site-footer">
   <div className="community-total">
