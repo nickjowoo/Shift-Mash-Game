@@ -203,15 +203,14 @@ async function fetchAnnouncement() {
 }
 async function verifyAnnouncementPassword(password) {
   const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,  // ← ADD THIS
-    },
-     body: JSON.stringify({ action: 'verify', password: password.trim() }),
-    }),
-  })
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+  },
+  body: JSON.stringify({ action: 'verify', password: password.trim() }),
+})
 
   const data = await response.json().catch(() => ({}))
 
