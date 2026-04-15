@@ -663,61 +663,8 @@ input {
   .mobile-mash-button:disabled {
     opacity: 0.45;
   }
-  .intro-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  min-width: 100vw;
-  min-height: 100vh;
-  z-index: 999999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at top, #1e3a8a 0%, #0f172a 36%, #020617 100%);
-  animation: introFadeOut 1s ease 1.8s forwards;
-  overflow: hidden;
-}
+ 
 
-.intro-card {
-  width: 100vw;
-  height: 100vh;
-  min-width: 100vw;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px;
-}
 
-.intro-madeby {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #93c5fd;
-  margin-bottom: 10px;
-}
 
-.intro-names {
-  font-size: clamp(1.4rem, 4vw, 2.8rem);
-  font-weight: 900;
-  line-height: 1.2;
-  color: #ffffff;
-  max-width: 900px;
-}
-
-@keyframes introFadeOut {
-  0% {
-    opacity: 1;
-    visibility: visible;
-  }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
 }
