@@ -653,15 +653,17 @@ input {
 }
 
 .rank-hacker {
+  display: inline-block;
   background: linear-gradient(90deg, #7cff7c, #00ff66, #0b0b0b, #39ff14, #0f0f0f, #7cff7c);
   background-size: 240% 100%;
-  animation: shineLoop 3.2s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
+  animation: shineLoop 2.8s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-shadow:
     0.02em 0 0 rgba(0, 255, 102, 0.28),
     -0.02em 0 0 rgba(124, 255, 124, 0.18);
+  will-change: transform, filter, background-position;
 }
 
 .border-noob {
@@ -845,15 +847,42 @@ input {
 }
 
 @keyframes hackerGlitch {
-  0% { transform: translateX(0); filter: brightness(1); }
-  8% { transform: translateX(0.4px); }
-  10% { transform: translateX(-0.6px); }
-  12% { transform: translateX(0); filter: brightness(1.08); }
-  42% { transform: translateX(0); }
-  44% { transform: translateX(0.5px); }
-  46% { transform: translateX(-0.4px); }
-  48% { transform: translateX(0); filter: brightness(1); }
-  100% { transform: translateX(0); filter: brightness(1); }
+  0% {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+  6% {
+    transform: translateX(0.8px);
+    filter: brightness(1.05);
+  }
+  8% {
+    transform: translateX(-1px);
+  }
+  10% {
+    transform: translateX(0.6px);
+  }
+  12% {
+    transform: translateX(0);
+    filter: brightness(1.1);
+  }
+  42% {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+  44% {
+    transform: translateX(0.9px);
+  }
+  46% {
+    transform: translateX(-0.8px);
+  }
+  48% {
+    transform: translateX(0);
+    filter: brightness(1.06);
+  }
+  100% {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
 }
 
 @media (max-width: 980px) {
