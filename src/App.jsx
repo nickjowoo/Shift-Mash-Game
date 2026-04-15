@@ -661,7 +661,10 @@ export default function App() {
                           <div className="space-between">
                             <div>
                               <div className="place">
-                                #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                              {index === 0 && <span className="place-medal">🥇</span>}
+                              {index === 1 && <span className="place-medal">🥈</span>}
+                              {index === 2 && <span className="place-medal">🥉</span>}
+                              #{index + 1} <span className="device-icon">{deviceIcon}</span>
                               </div>
                               <div className="player-name">{entry.name}</div>
                               <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
