@@ -734,17 +734,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div
-  className={`player-position-card ${
-    playerPosition?.position === 1
-      ? 'border-gold'
-      : playerPosition?.position === 2
-      ? 'border-silver'
-      : playerPosition?.position === 3
-      ? 'border-bronze'
-      : ''
-  }`}
->
+              <div className="player-position-card">
   <div className="player-position-title">Your Position</div>
   {playerPosition ? (
     <div className="player-position-row">
