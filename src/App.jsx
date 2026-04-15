@@ -272,12 +272,12 @@ export default function App() {
   const [totalPresses, setTotalPresses] = useState(0)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false)
   const [announcement, setAnnouncement] = useState('Welcome to Shift Mash Arena.')
-const [showAdminLogin, setShowAdminLogin] = useState(false)
-const [showAnnouncementEditor, setShowAnnouncementEditor] = useState(false)
+const [showAdminPanel, setShowAdminPanel] = useState(false)
 const [adminPassword, setAdminPassword] = useState('')
 const [announcementDraft, setAnnouncementDraft] = useState('')
 const [adminError, setAdminError] = useState('')
 const [adminToken, setAdminToken] = useState('')
+const [isAdminVerified, setIsAdminVerified] = useState(false)
   
 
   const gameTimerRef = useRef(null)
@@ -611,16 +611,16 @@ const [adminToken, setAdminToken] = useState('')
       </div>
     )}
 
-    {showAdminLogin && (
-  <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
+    {showAdminPanel && (
+  <div className="policy-overlay" onClick={() => setShowAdminPanel(false)}>
     <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
       <div className="policy-header">
         <h3 className="policy-title">Admin Access</h3>
         <button
           className="policy-close"
           type="button"
-          onClick={() => setShowAdminLogin(false)}
-          aria-label="Close admin login"
+          onClick={() => setShowAdminPanel(false)}
+          aria-label="Close admin panel"
         >
           ×
         </button>
@@ -628,13 +628,14 @@ const [adminToken, setAdminToken] = useState('')
 
       <div className="policy-content">
         <input
-          className="text-input"
+          className={`text-input ${isAdminVerified ? 'admin-input-success' : ''}`}
           type="password"
           value={adminPassword}
           onChange={(e) => setAdminPassword(e.target.value)}
           placeholder="Enter password"
+          disabled={isAdminVerified}
         />
-        {adminError && <div className="name-error-text">{adminError}</div>}
+
         <button
           className="button button-primary"
           type="button"
@@ -652,103 +653,76 @@ const [adminToken, setAdminToken] = useState('')
               const token = await verifyAnnouncementPassword(trimmedPassword)
 
               setAdminToken(token)
-              setAdminPassword('')
-              setShowAdminLogin(false)
-              setShowAnnouncementEditor(true)
-              setAnnouncementDraft(announcement)
+              setIsAdminVerified(true)
+              setAdminError('')
             } catch (err) {
               setAdminToken('')
+              setIsAdminVerified(false)
               setAdminError(
                 err instanceof Error ? err.message : 'Password verification failed'
               )
             }
           }}
+          disabled={isAdminVerified}
         >
-          Enter
+          {isAdminVerified ? 'Verified' : 'Verify'}
+        </button>
+
+        <textarea
+          className={`announcement-editor ${isAdminVerified ? 'announcement-editor-enabled' : 'announcement-editor-disabled'}`}
+          value={announcementDraft}
+          onChange={(e) => setAnnouncementDraft(e.target.value)}
+          placeholder="Type a global announcement..."
+          maxLength={220}
+          disabled={!isAdminVerified}
+        />
+
+        {adminError && <div className="name-error-text">{adminError}</div>}
+
+        <button
+          className="button button-primary"
+          type="button"
+          disabled={!isAdminVerified}
+          onClick={async () => {
+            try {
+              const trimmedAnnouncement = announcementDraft.trim()
+
+              if (!trimmedAnnouncement) {
+                setAdminError('Announcement cannot be empty.')
+                return
+              }
+
+              if (!adminToken) {
+                setAdminError('Admin access expired. Verify the password again.')
+                setIsAdminVerified(false)
+                return
+              }
+
+              setAdminError('')
+
+              await updateAnnouncement(adminToken, trimmedAnnouncement)
+
+              setAnnouncement(trimmedAnnouncement)
+              setAnnouncementDraft(trimmedAnnouncement)
+              setShowAdminPanel(false)
+            } catch (err) {
+              const message =
+                err instanceof Error ? err.message : 'Failed to update announcement.'
+
+              setAdminToken('')
+              setIsAdminVerified(false)
+              setAdminError(message)
+            }
+          }}
+        >
+          Submit Announcement
         </button>
       </div>
     </div>
   </div>
 )}
 
-    {showAnnouncementEditor && (
-      <div className="policy-overlay" onClick={() => setShowAnnouncementEditor(false)}>
-        <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="policy-header">
-            <h3 className="policy-title">Update Announcement</h3>
-            <button
-              className="policy-close"
-              type="button"
-              onClick={() => setShowAnnouncementEditor(false)}
-              aria-label="Close announcement editor"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="policy-content">
-            <textarea
-              className="announcement-editor"
-              value={announcementDraft}
-              onChange={(e) => setAnnouncementDraft(e.target.value)}
-              placeholder="Type a global announcement..."
-              maxLength={220}
-            />
-            {adminError && <div className="name-error-text">{adminError}</div>}
-            <button
-              className="button button-primary"
-              type="button"
-              onClick={async () => {
-  try {
-    const trimmedAnnouncement = announcementDraft.trim()
-
-    if (!trimmedAnnouncement) {
-      setAdminError('Announcement cannot be empty.')
-      return
-    }
-
-    if (!adminToken) {
-      setAdminError('Enter the admin password first.')
-      setShowAnnouncementEditor(false)
-      setShowAdminLogin(true)
-      return
-    }
-
-    setAdminError('')
-
-    await updateAnnouncement(adminToken, trimmedAnnouncement)
-
-    setAnnouncement(trimmedAnnouncement)
-    setAnnouncementDraft(trimmedAnnouncement)
-    setShowAnnouncementEditor(false)
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to update announcement.'
-
-    setAdminToken('')
-
-    if (
-      message.includes('expired') ||
-      message.includes('Invalid') ||
-      message.includes('Missing admin token') ||
-      message.includes('Unauthorized')
-    ) {
-      setShowAnnouncementEditor(false)
-      setShowAdminLogin(true)
-      setAdminError('Wrong password or expired admin access.')
-      return
-    }
-
-    setAdminError(message)
-  }
-}}            >
-              Enter
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-
+   
     <div className="announcement-bar">
       <span className="announcement-label">Announcement:</span>
       <span className="announcement-text">{announcement}</span>
@@ -1056,8 +1030,9 @@ const [adminToken, setAdminToken] = useState('')
     setAdminError('')
     setAdminPassword('')
     setAdminToken('')
-    setShowAnnouncementEditor(false)
-    setShowAdminLogin(true)
+    setIsAdminVerified(false)
+    setAnnouncementDraft(announcement)
+    setShowAdminPanel(true)
   }}
 >
   Admin
