@@ -207,7 +207,6 @@ async function verifyAnnouncementPassword(password) {
     headers: {
       'Content-Type': 'application/json',
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     },
     body: JSON.stringify({
       action: 'verify',
@@ -222,10 +221,10 @@ async function verifyAnnouncementPassword(password) {
   }
 
   if (!data?.token || typeof data.token !== 'string') {
-    throw new Error('Password verification failed')
+    throw new Error('Verify succeeded, but no admin token was returned by the Edge Function.')
   }
 
-  return data
+  return data.token
 }
 
 async function updateAnnouncement(adminToken, message) {
@@ -649,18 +648,15 @@ const [adminToken, setAdminToken] = useState('')
 
     setAdminError('')
 
-    const result = await verifyAnnouncementPassword(trimmedPassword)
+    const token = await verifyAnnouncementPassword(trimmedPassword)
 
-    if (!result?.token || typeof result.token !== 'string') {
-      throw new Error('Wrong password.')
-    }
-
-    setAdminToken(result.token)
+    setAdminToken(token)
     setShowAdminLogin(false)
     setShowAnnouncementEditor(true)
+    setAnnouncementDraft(announcement)
   } catch (err) {
     setAdminToken('')
-    setAdminError('Wrong password.')
+    setAdminError(err instanceof Error ? err.message : 'Password verification failed')
   }
 }}
             >
