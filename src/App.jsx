@@ -141,6 +141,15 @@ function getPlayerPosition(leaderboard, submittedId) {
     entry: sorted[index],
   }
 }
+const SiteFooter = React.memo(function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+      <div className="footer-year">2026</div>
+    </footer>
+  )
+})
+
 export default function App() {
   const [phase, setPhase] = useState('idle')
   const [countdown, setCountdown] = useState(PRE_COUNTDOWN)
@@ -162,6 +171,8 @@ export default function App() {
   const countdownRef = useRef(null)
   const startStampRef = useRef(null)
   const calloutTimerRef = useRef(null)
+  const pendingPressesRef = useRef(0)
+  const scoreFrameRef = useRef(null)
 
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
@@ -213,6 +224,7 @@ const playerPosition = useMemo(() => {
       if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
       if (countdownRef.current) clearInterval(countdownRef.current)
       if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
+      if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     }
   }, [])
 
@@ -224,8 +236,7 @@ const playerPosition = useMemo(() => {
       const isShift = e.code === 'ShiftLeft' || e.code === 'ShiftRight'
       if (!isShift) return
 
-      setScore((prev) => prev + 1)
-      setLastKey(e.code === 'ShiftLeft' ? 'LShift' : 'RShift')
+      registerPress(e.code === 'ShiftLeft' ? 'LShift' : 'RShift')
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -247,12 +258,26 @@ const playerPosition = useMemo(() => {
       if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
     }
   }, [phase])
+  
+  const flushScore = () => {
+  if (pendingPressesRef.current > 0) {
+    const amount = pendingPressesRef.current
+    pendingPressesRef.current = 0
+    setScore((prev) => prev + amount)
+  }
+  scoreFrameRef.current = null
+}
 
   const registerPress = (keyLabel) => {
-    if (phase !== 'playing') return
-    setScore((prev) => prev + 1)
-    setLastKey(keyLabel)
+  if (phase !== 'playing') return
+
+  pendingPressesRef.current += 1
+  setLastKey(keyLabel)
+
+  if (!scoreFrameRef.current) {
+    scoreFrameRef.current = requestAnimationFrame(flushScore)
   }
+}
 
   const beginGame = () => {
     setScore(0)
@@ -307,6 +332,7 @@ const playerPosition = useMemo(() => {
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (countdownRef.current) clearInterval(countdownRef.current)
     if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
+    if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     setPhase('idle')
     setCountdown(PRE_COUNTDOWN)
     setTimeLeft(GAME_DURATION)
@@ -454,16 +480,14 @@ const submitScore = async () => {
                 <div className="mobile-controls">
                   <button
                     className="mobile-mash-button"
-                    onTouchStart={() => registerPress('LTap')}
-                    onMouseDown={() => registerPress('LTap')}
+                    onPointerDown={() => registerPress('LTap')}
                     disabled={phase !== 'playing'}
                   >
                     L
                   </button>
                   <button
                     className="mobile-mash-button"
-                    onTouchStart={() => registerPress('RTap')}
-                    onMouseDown={() => registerPress('RTap')}
+                    onPointerDown={() => registerPress('RTap')}
                     disabled={phase !== 'playing'}
                   >
                     R
@@ -599,9 +623,7 @@ const submitScore = async () => {
           </aside>
         </div>
 
-        <footer className="site-footer">
-          <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
-          <div className="footer-year">2026</div>
+        <SiteFooter />
         </footer>
       </div>
     </div>
