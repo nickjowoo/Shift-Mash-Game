@@ -217,6 +217,7 @@ async function verifyAnnouncementPassword(password) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
+    console.log(data?.error)
     throw new Error(data?.error || `Password verification failed (${response.status})`)
   }
 
