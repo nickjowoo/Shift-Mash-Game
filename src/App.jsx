@@ -533,10 +533,11 @@ export default function App() {
               </div>
 
               <div className={`callout-box ${rank.borderClass}`}>
-                <div className={`callout-score ${phase === 'countdown' ? 'countdown-score' : rank.textClass}`}>
-                  {mainDisplay}
-                </div>
-              </div>
+  <div className="callout-label">Presses</div>
+  <div className={`callout-score ${phase === 'countdown' ? 'countdown-score' : rank.textClass}`}>
+    {mainDisplay}
+  </div>
+</div>
 
               <div className="motivation-wrap">
                 <div className="callout-bubble">
