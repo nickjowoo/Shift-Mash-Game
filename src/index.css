@@ -197,6 +197,10 @@ input {
   color: #e2e8f0;
 }
 
+.mobile-controls {
+  display: none;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -356,6 +360,11 @@ input {
   font-size: 0.58rem;
 }
 
+.device-icon {
+  margin-left: 4px;
+  font-size: 0.72rem;
+}
+
 .player-name {
   font-weight: 800;
   font-size: 0.84rem;
@@ -366,8 +375,9 @@ input {
   font-size: 0.72rem;
   margin-top: 2px;
 }
+
 .player-kpm {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   margin-top: 3px;
   color: #94a3b8;
   font-weight: 600;
@@ -518,5 +528,27 @@ input {
   .callout-text {
     white-space: normal;
     text-align: center;
+  }
+
+  .mobile-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .mobile-mash-button {
+    border: none;
+    border-radius: 18px;
+    min-height: 84px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    background: rgba(37, 99, 235, 0.95);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .mobile-mash-button:disabled {
+    opacity: 0.45;
   }
 }
