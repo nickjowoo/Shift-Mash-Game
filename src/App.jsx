@@ -314,20 +314,19 @@ export default function App() {
                   <div className="stat-value">{formatTime(timeLeft)}s</div>
                 </div>
 
-                <div className={`stat-box ${rank.borderClass}`}>
-                  <div className="stat-label">Live Count</div>
-                  <div className={`stat-value ${rank.textClass}`}>{score}</div>
-                </div>
-
                 <div className="stat-box">
                   <div className="stat-label">Last Key</div>
                   <div className="stat-value">{lastKey}</div>
                 </div>
               </div>
 
-              <div className="callout-box">
-                <div className="callout-text">
-                  {phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : callout}
+              <div className={`callout-box ${rank.borderClass}`}>
+                <div className={`callout-score ${rank.textClass}`}>{score}</div>
+
+                <div className="callout-bubble">
+                  <div className="callout-text">
+                    {phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : callout}
+                  </div>
                 </div>
               </div>
 
@@ -426,8 +425,6 @@ export default function App() {
                   })
                 )}
               </div>
-
-
             </div>
           </aside>
         </div>
