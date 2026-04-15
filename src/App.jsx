@@ -186,6 +186,40 @@ const SiteFooter = React.memo(function SiteFooter({ totalPresses }) {
     </footer>
   )
 })
+async function fetchAnnouncement() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/announcements?select=id,message,updated_at&id=eq.1`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    }
+  )
+
+  if (!response.ok) throw new Error('Failed to fetch announcement')
+  const rows = await response.json()
+  return rows?.[0]?.message || 'Welcome to Shift Mash Arena.'
+}
+
+async function updateAnnouncement(password, message) {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({ password, message }),
+  })
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data?.error || 'Failed to update announcement')
+  }
+
+  return response.json()
+}
 
 export default function App() {
   const [phase, setPhase] = useState('idle')
@@ -206,6 +240,12 @@ export default function App() {
   const [lastSubmittedId, setLastSubmittedId] = useState(null)
   const [totalPresses, setTotalPresses] = useState(0)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false)
+  const [announcement, setAnnouncement] = useState('Welcome to Shift Mash Arena.')
+const [showAdminLogin, setShowAdminLogin] = useState(false)
+const [showAnnouncementEditor, setShowAnnouncementEditor] = useState(false)
+const [adminPassword, setAdminPassword] = useState('')
+const [announcementDraft, setAnnouncementDraft] = useState('')
+const [adminError, setAdminError] = useState('')
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -263,6 +303,46 @@ export default function App() {
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
   }, [])
+  useEffect(() => {
+  let channel
+
+  const initAnnouncement = async () => {
+    try {
+      const message = await fetchAnnouncement()
+      setAnnouncement(message)
+      setAnnouncementDraft(message)
+    } catch (err) {
+      console.error('Could not load announcement', err)
+    }
+
+    if (window.supabase) return
+  }
+
+  initAnnouncement()
+
+  const { createClient } = window.supabaseLib || {}
+  if (!createClient) return
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  channel = supabase
+    .channel('announcements-live')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'announcements' },
+      (payload) => {
+        if (payload?.new?.message) {
+          setAnnouncement(payload.new.message)
+          setAnnouncementDraft(payload.new.message)
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    if (channel) supabase.removeChannel(channel)
+  }
+}, [])
 
   useEffect(() => {
     loadLeaderboard()
@@ -467,8 +547,99 @@ export default function App() {
         >
           ×
         </button>
+        {showAdminLogin && (
+  <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
+    <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="policy-header">
+        <h3 className="policy-title">Admin Access</h3>
+        <button
+          className="policy-close"
+          type="button"
+          onClick={() => setShowAdminLogin(false)}
+          aria-label="Close admin login"
+        >
+          ×
+        </button>
       </div>
 
+      <div className="policy-content">
+        <input
+          className="text-input"
+          type="password"
+          value={adminPassword}
+          onChange={(e) => setAdminPassword(e.target.value)}
+          placeholder="Enter password"
+        />
+        {adminError && <div className="name-error-text">{adminError}</div>}
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={() => {
+            if (!adminPassword.trim()) {
+              setAdminError('Enter the admin password.')
+              return
+            }
+            setAdminError('')
+            setShowAdminLogin(false)
+            setShowAnnouncementEditor(true)
+          }}
+        >
+          Enter
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+      {showAnnouncementEditor && (
+  <div className="policy-overlay" onClick={() => setShowAnnouncementEditor(false)}>
+    <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="policy-header">
+        <h3 className="policy-title">Update Announcement</h3>
+        <button
+          className="policy-close"
+          type="button"
+          onClick={() => setShowAnnouncementEditor(false)}
+          aria-label="Close announcement editor"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="policy-content">
+        <textarea
+          className="announcement-editor"
+          value={announcementDraft}
+          onChange={(e) => setAnnouncementDraft(e.target.value)}
+          placeholder="Type a global announcement..."
+          maxLength={220}
+        />
+        {adminError && <div className="name-error-text">{adminError}</div>}
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={async () => {
+            try {
+              await updateAnnouncement(adminPassword, announcementDraft)
+              setAnnouncement(announcementDraft)
+              setShowAnnouncementEditor(false)
+              setAdminError('')
+              localStorage.setItem('announcement_admin_unlocked', 'true')
+            } catch (err) {
+              setAdminError('Wrong password or failed to update announcement.')
+            }
+          }}
+        >
+          Enter
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+      </div>
+<div className="announcement-bar">
+  <span className="announcement-label">Announcement:</span>
+  <span className="announcement-text">{announcement}</span>
+</div>
       <div className="policy-content">
         <p>
           This game collects the name you choose for the leaderboard, your score,
@@ -791,6 +962,17 @@ export default function App() {
             >
               Privacy Policy
             </button>
+            <span className="footer-separator">•</span>
+<button
+  className="privacy-policy-button"
+  type="button"
+  onClick={() => {
+    setAdminError('')
+    setShowAdminLogin(true)
+  }}
+>
+  Admin
+</button>
           </div>
         </footer>
       </div>
