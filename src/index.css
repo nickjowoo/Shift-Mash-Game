@@ -645,19 +645,9 @@ input {
 
 .rank-radiant {
   display: inline-block;
-  background: linear-gradient(
-    90deg,
-    #00ff85 0%,
-    #00c2ff 16%,
-    #7a5cff 32%,
-    #ff00b3 48%,
-    #ff0040 64%,
-    #ff7b00 78%,
-    #ffee00 90%,
-    #00ff85 100%
-  );
-  background-size: 260% 100%;
-  animation: shineLoopSmooth 3.6s linear infinite;
+  background: linear-gradient(90deg, #ff0040, #ff7b00, #ffee00, #00ff85, #00c2ff, #7a5cff, #ff00b3);
+  background-size: 200% 200%;
+  animation: shineLoop 3.2s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -665,17 +655,9 @@ input {
 
 .rank-hacker {
   display: inline-block;
-  background: linear-gradient(
-    90deg,
-    #39ff14 0%,
-    #7cff7c 18%,
-    #00ff66 36%,
-    #0b0b0b 54%,
-    #0f0f0f 72%,
-    #39ff14 100%
-  );
-  background-size: 240% 100%;
-  animation: shineLoopSmooth 4s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
+  background: linear-gradient(90deg, #7cff7c, #00ff66, #0b0b0b, #39ff14, #0f0f0f, #7cff7c);
+  background-size: 200% 200%;
+  animation: shineLoop 3.2s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
