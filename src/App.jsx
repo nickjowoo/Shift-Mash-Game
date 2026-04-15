@@ -49,6 +49,7 @@ function isSupabaseConfigured() {
   )
 }
 
+
 function getCurrentCycleStart() {
   const now = Date.now()
   return Math.floor(now / RESET_MS) * RESET_MS
@@ -95,6 +96,22 @@ async function supabaseRequest(path, options = {}) {
       ...(options.headers || {}),
     },
   })
+  async function fetchTotalPresses() {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_total_presses`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch total presses.')
+  }
+
+  return response.json()
+}
 
   if (!response.ok) {
     const text = await response.text()
@@ -146,7 +163,7 @@ const SiteFooter = React.memo(function SiteFooter() {
   return (
     <footer className="site-footer">
   <div className="community-total">
-    Community total: <span className="community-total-value">{communityTotal.toLocaleString()}</span> presses
+    All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
   </div>
   <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
   <div className="footer-year">2026</div>
@@ -221,6 +238,7 @@ export default function App() {
   const [resetCountdown, setResetCountdown] = useState('')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [lastSubmittedId, setLastSubmittedId] = useState(null)
+  const [totalPresses, setTotalPresses] = useState(0)
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -261,9 +279,21 @@ const playerPosition = useMemo(() => {
       setLeaderboardLoading(false)
     }
   }
+  const loadTotalPresses = async () => {
+  if (!cloudReady) return
+
+  try {
+    const total = await fetchTotalPresses()
+    setTotalPresses(Number(total) || 0)
+  } catch (error) {
+    console.error('Could not load total presses', error)
+  }
+}
+  
 
   useEffect(() => {
     loadLeaderboard()
+    loadTotalPresses()
   }, [])
 
   useEffect(() => {
@@ -378,6 +408,7 @@ const playerPosition = useMemo(() => {
 
     gameTimerRef.current = requestAnimationFrame(tick)
   }
+  
 
   const finishGame = () => {
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
@@ -430,6 +461,7 @@ const submitScore = async () => {
 
     setSavedThisRound(true)
     await loadLeaderboard()
+    await loadTotalPresses()
   } catch (error) {
     setLeaderboardError('Could not save your score online.')
   }
