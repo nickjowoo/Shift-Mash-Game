@@ -355,7 +355,7 @@ input {
   background: rgba(30, 41, 59, 0.72);
 }
 .leaderboard-scroll {
-  max-height: 420px;
+  max-height: 320px;
   overflow-y: auto;
   padding-right: 4px;
   margin-top: 8px;
