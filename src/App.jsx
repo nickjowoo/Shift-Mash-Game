@@ -4,8 +4,8 @@ const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
 const MAX_LEADERBOARD = 10
 
-const SUPABASE_URL = 'YOUR_SUPABASE_URL'
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_SbcuqjkKm40oS6iA5bWBog_8xkxhFrP'
 const SUPABASE_TABLE = 'scores'
 
 const CALLOUTS = [
