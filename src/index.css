@@ -506,6 +506,10 @@ input {
   letter-spacing: 0.16em;
   font-size: 0.58rem;
 }
+.place-medal {
+  margin-right: 4px;
+  font-size: 0.72rem;
+}
 
 .device-icon {
   margin-left: 4px;
