@@ -250,10 +250,6 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="container">
-        <div className="banner">
-          <strong>{cloudReady ? 'Global leaderboard mode is enabled.' : 'Global leaderboard mode is ready to connect.'}</strong>
-          <div>{cloudReady ? 'Anyone using your deployed link will share the same leaderboard.' : 'Paste your Supabase URL and anon key into App.jsx.'}</div>
-        </div>
 
         <div className="grid">
           <section className="card">
@@ -388,31 +384,6 @@ export default function App() {
             </div>
           </aside>
         </div>
-
-        <section className="card setup-card">
-          <div className="card-inner">
-            <h3 className="setup-title">One-time Supabase setup</h3>
-            <div className="setup-box">Open the SQL Editor in Supabase, paste this, and run it.</div>
-            <pre className="setup-code">{`create table public.scores (
-  id bigint generated always as identity primary key,
-  name text not null check (char_length(name) <= 20),
-  score integer not null check (score >= 0),
-  created_at timestamptz not null default now()
-);
-
-alter table public.scores enable row level security;
-
-create policy "Anyone can read scores"
-on public.scores
-for select
-using (true);
-
-create policy "Anyone can insert scores"
-on public.scores
-for insert
-with check (true);`}</pre>
-          </div>
-        </section>
       </div>
     </div>
   )
