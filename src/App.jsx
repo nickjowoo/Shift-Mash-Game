@@ -425,7 +425,7 @@ export default function App() {
   <div className="place">#{index + 1}</div>
   <div className="player-name">{entry.name}</div>
   <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
-  <div className="player-kpm">{entry.score * 3} keys/min</div>
+  <div className="player-kpm">{Math.round(entry.score * 3)} keys/min</div>
 </div>
 
                           <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
