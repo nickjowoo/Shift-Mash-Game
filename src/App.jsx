@@ -417,4 +417,3 @@ with check (true);`}</pre>
     </div>
   )
 }
-export default App
