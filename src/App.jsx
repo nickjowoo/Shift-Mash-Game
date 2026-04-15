@@ -152,6 +152,15 @@ const SiteFooter = React.memo(function SiteFooter() {
 function isInappropriateName(name) {
   const normalized = name
     .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[@]/g, 'a')
+    .replace(/[4]/g, 'a')
+    .replace(/[3]/g, 'e')
+    .replace(/[1!|]/g, 'i')
+    .replace(/[0]/g, 'o')
+    .replace(/[5$]/g, 's')
+    .replace(/[7]/g, 't')
     .replace(/[^a-z0-9]/g, '')
 
   const blockedTerms = [
@@ -161,6 +170,7 @@ function isInappropriateName(name) {
     'bitch',
     'asshole',
     'dick',
+    'cock',
     'pussy',
     'cunt',
     'nigger',
@@ -173,16 +183,21 @@ function isInappropriateName(name) {
     'sex',
     'rape',
     'rapist',
-    'kill',
-    'suicide',
     'hitler',
     'nazi',
-    'n1gger',
-    'nigg3r',
-    'n1gg3r'
+    'kkk',
   ]
 
   return blockedTerms.some((term) => normalized.includes(term))
+}
+function isBadDisplayName(name) {
+  const trimmed = name.trim()
+  if (trimmed.length < 2) return true
+
+  const visibleChars = trimmed.replace(/[^a-zA-Z0-9]/g, '')
+  if (visibleChars.length < 2) return true
+
+  return false
 }
 
 export default function App() {
@@ -382,10 +397,10 @@ const submitScore = async () => {
   const finalName = (nameDraft.trim() || playerName.trim() || 'Player').slice(0, 20)
   setPlayerName(finalName)
 
-  if (isInappropriateName(finalName)) {
-    setNameError('Please refrain from using inappropriate names!')
-    return
-  }
+  if (isBadDisplayName(finalName) || isInappropriateName(finalName)) {
+  setNameError('Please use an appropriate name with readable characters.')
+  return
+}
 
   setNameError('')
 
@@ -578,7 +593,7 @@ const submitScore = async () => {
   placeholder="Enter a name for the leaderboard"
   maxLength={20}
 />
-                      {nameError && <div className="name-error-text">Please refrain from using inappropriate names!</div>}
+                      {nameError && <div className="name-error-text">Please use an appropriate name with readable characters.</div>}
                       <button
                         className="button button-success"
                         onClick={submitScore}
