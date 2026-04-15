@@ -251,28 +251,6 @@ async function updateAnnouncement(adminToken, message) {
   return data
 }
 
-async function updateAnnouncement(adminToken, message) {
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${adminToken}`,
-    },
-    body: JSON.stringify({
-      action: 'update',
-      message,
-    }),
-  })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw new Error(data?.error || 'Failed to update announcement')
-  }
-
-  return data
-}
 
 export default function App() {
   const [phase, setPhase] = useState('idle')
