@@ -216,13 +216,15 @@ async function verifyAnnouncementPassword(password) {
   })
 
   const data = await response.json().catch(() => ({}))
-
   if (!response.ok) {
     throw new Error(data?.error || 'Password verification failed')
   }
 
+  if (!data?.token || typeof data.token !== 'string') {
+    throw new Error('Password verification failed')
+  }
+
   return data
-}
 
 async function updateAnnouncement(adminToken, message) {
   const response = await fetch(`${SUPABASE_URL}/functions/v1/set-announcement`, {
@@ -272,7 +274,7 @@ const [showAnnouncementEditor, setShowAnnouncementEditor] = useState(false)
 const [adminPassword, setAdminPassword] = useState('')
 const [announcementDraft, setAnnouncementDraft] = useState('')
 const [adminError, setAdminError] = useState('')
-  const [adminToken, setAdminToken] = useState(localStorage.getItem('announcement_admin_token') || '')
+const [adminToken, setAdminToken] = useState('')
   
 
   const gameTimerRef = useRef(null)
@@ -635,21 +637,26 @@ const [adminError, setAdminError] = useState('')
               type="button"
               onClick={async () => {
   try {
-    if (!adminPassword.trim()) {
+    const trimmedPassword = adminPassword.trim()
+
+    if (!trimmedPassword) {
       setAdminError('Enter the admin password.')
       return
     }
 
     setAdminError('')
 
-    const result = await verifyAnnouncementPassword(adminPassword)
+    const result = await verifyAnnouncementPassword(trimmedPassword)
+
+    if (!result?.token || typeof result.token !== 'string') {
+      throw new Error('Wrong password.')
+    }
 
     setAdminToken(result.token)
-    localStorage.setItem('announcement_admin_token', result.token)
-
     setShowAdminLogin(false)
     setShowAnnouncementEditor(true)
   } catch (err) {
+    setAdminToken('')
     setAdminError('Wrong password.')
   }
 }}
@@ -690,13 +697,15 @@ const [adminError, setAdminError] = useState('')
               type="button"
               onClick={async () => {
   try {
-    if (!announcementDraft.trim()) {
+    const trimmedAnnouncement = announcementDraft.trim()
+
+    if (!trimmedAnnouncement) {
       setAdminError('Announcement cannot be empty.')
       return
     }
 
     if (!adminToken) {
-      setAdminError('Admin session expired. Enter the password again.')
+      setAdminError('Enter the admin password first.')
       setShowAnnouncementEditor(false)
       setShowAdminLogin(true)
       return
@@ -704,30 +713,32 @@ const [adminError, setAdminError] = useState('')
 
     setAdminError('')
 
-    await updateAnnouncement(adminToken, announcementDraft)
+    await updateAnnouncement(adminToken, trimmedAnnouncement)
 
-    setAnnouncement(announcementDraft)
+    setAnnouncement(trimmedAnnouncement)
+    setAnnouncementDraft(trimmedAnnouncement)
     setShowAnnouncementEditor(false)
   } catch (err) {
-    const message = err?.message || 'Failed to update announcement.'
+    const message =
+      err instanceof Error ? err.message : 'Failed to update announcement.'
+
+    setAdminToken('')
 
     if (
       message.includes('expired') ||
-      message.includes('Invalid or expired admin token') ||
-      message.includes('Missing admin token')
+      message.includes('Invalid') ||
+      message.includes('Missing admin token') ||
+      message.includes('Unauthorized')
     ) {
-      localStorage.removeItem('announcement_admin_token')
-      setAdminToken('')
       setShowAnnouncementEditor(false)
       setShowAdminLogin(true)
-      setAdminError('Admin session expired. Enter the password again.')
+      setAdminError('Wrong password or expired admin access.')
       return
     }
 
     setAdminError(message)
   }
-}}
-            >
+}}            >
               Enter
             </button>
           </div>
@@ -1040,6 +1051,9 @@ const [adminError, setAdminError] = useState('')
   type="button"
   onClick={() => {
     setAdminError('')
+    setAdminPassword('')
+    setAdminToken('')
+    setShowAnnouncementEditor(false)
     setShowAdminLogin(true)
   }}
 >
