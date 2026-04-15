@@ -334,13 +334,7 @@ const [rankFlash, setRankFlash] = useState(false)
       console.error('Could not load total presses', error)
     }
   }
-  useEffect(() => {
-  if (rank.label !== prevRankRef.current) {
-    prevRankRef.current = rank.label
-    setRankFlash(true)
-    setTimeout(() => setRankFlash(false), 600)
-  }
-}, [rank.label])
+  
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
@@ -369,6 +363,14 @@ const [rankFlash, setRankFlash] = useState(false)
 
   return () => clearInterval(interval)
 }, [])
+
+  useEffect(() => {
+  if (rank.label !== prevRankRef.current) {
+    prevRankRef.current = rank.label
+    setRankFlash(true)
+    setTimeout(() => setRankFlash(false), 600)
+  }
+}, [rank.label])
 
   useEffect(() => {
     loadLeaderboard()
