@@ -155,7 +155,6 @@ export default function App() {
   const [leaderboardError, setLeaderboardError] = useState('')
   const [resetCountdown, setResetCountdown] = useState('')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
-  const [showIntro, setShowIntro] = useState(true)
   const [lastSubmittedId, setLastSubmittedId] = useState(null)
 
   const gameTimerRef = useRef(null)
@@ -216,13 +215,6 @@ const playerPosition = useMemo(() => {
     }
   }, [])
 
-  useEffect(() => {
-  const timer = setTimeout(() => {
-    setShowIntro(false)
-  }, 2200)
-
-  return () => clearTimeout(timer)
-}, [])
 
   useEffect(() => {
     if (phase !== 'playing') return
@@ -356,14 +348,6 @@ const submitScore = async () => {
 
   return (
     <div className="app-shell">
-      {showIntro && (
-  <div className="intro-overlay">
-    <div className="intro-card">
-      <div className="intro-madeby">Made by</div>
-      <div className="intro-names">Nick W., Kyle S., Felipe L.P.</div>
-    </div>
-  </div>
-)}
       <div className="container">
         <div className="grid">
           <section className="card">
