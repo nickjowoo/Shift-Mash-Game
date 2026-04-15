@@ -534,146 +534,147 @@ const [adminError, setAdminError] = useState('')
   const mainDisplay = phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
 
   return (
-    <div className="app-shell">
-      {showPrivacyPolicy && (
-  <div className="policy-overlay" onClick={() => setShowPrivacyPolicy(false)}>
-    <div className="policy-modal" onClick={(e) => e.stopPropagation()}>
-      <div className="policy-header">
-        <h3 className="policy-title">Privacy Policy</h3>
-        <button
-          className="policy-close"
-          type="button"
-          onClick={() => setShowPrivacyPolicy(false)}
-          aria-label="Close privacy policy"
-        >
-          ×
-        </button>
-      <div className="policy-content">
-        <p>
-          This game collects the name you choose for the leaderboard, your score,
-          your device type, and the time your score was submitted.
-        </p>
-        <p>
-          This information is used only to run the leaderboard, show player rankings,
-          calculate total presses, and support the game’s features.
-        </p>
-        <p>
-          Scores and leaderboard information are stored using Supabase and the site is
-          hosted through Vercel. Basic technical information, such as IP address and
-          browser/device data, may also be processed by those services as part of normal
-          site operation.
-        </p>
-        <p>
-          This site does not currently use accounts, payments, or targeted advertising.
-          If the site changes in the future, this policy may be updated.
-        </p>
-        <p>
-          By submitting a name to the leaderboard, you agree to display that name and
-          score publicly within the game.
-        </p>
-        <p className="policy-effective">Effective date: 2026</p>
+  <div className="app-shell">
+    {showPrivacyPolicy && (
+      <div className="policy-overlay" onClick={() => setShowPrivacyPolicy(false)}>
+        <div className="policy-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="policy-header">
+            <h3 className="policy-title">Privacy Policy</h3>
+            <button
+              className="policy-close"
+              type="button"
+              onClick={() => setShowPrivacyPolicy(false)}
+              aria-label="Close privacy policy"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="policy-content">
+            <p>
+              This game collects the name you choose for the leaderboard, your score,
+              your device type, and the time your score was submitted.
+            </p>
+            <p>
+              This information is used only to run the leaderboard, show player rankings,
+              calculate total presses, and support the game’s features.
+            </p>
+            <p>
+              Scores and leaderboard information are stored using Supabase and the site is
+              hosted through Vercel. Basic technical information, such as IP address and
+              browser/device data, may also be processed by those services as part of normal
+              site operation.
+            </p>
+            <p>
+              This site does not currently use accounts, payments, or targeted advertising.
+              If the site changes in the future, this policy may be updated.
+            </p>
+            <p>
+              By submitting a name to the leaderboard, you agree to display that name and
+              score publicly within the game.
+            </p>
+            <p className="policy-effective">Effective date: 2026</p>
+          </div>
+        </div>
       </div>
+    )}
+
+    {showAdminLogin && (
+      <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
+        <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="policy-header">
+            <h3 className="policy-title">Admin Access</h3>
+            <button
+              className="policy-close"
+              type="button"
+              onClick={() => setShowAdminLogin(false)}
+              aria-label="Close admin login"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="policy-content">
+            <input
+              className="text-input"
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              placeholder="Enter password"
+            />
+            {adminError && <div className="name-error-text">{adminError}</div>}
+            <button
+              className="button button-primary"
+              type="button"
+              onClick={() => {
+                if (!adminPassword.trim()) {
+                  setAdminError('Enter the admin password.')
+                  return
+                }
+                setAdminError('')
+                setShowAdminLogin(false)
+                setShowAnnouncementEditor(true)
+              }}
+            >
+              Enter
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showAnnouncementEditor && (
+      <div className="policy-overlay" onClick={() => setShowAnnouncementEditor(false)}>
+        <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="policy-header">
+            <h3 className="policy-title">Update Announcement</h3>
+            <button
+              className="policy-close"
+              type="button"
+              onClick={() => setShowAnnouncementEditor(false)}
+              aria-label="Close announcement editor"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="policy-content">
+            <textarea
+              className="announcement-editor"
+              value={announcementDraft}
+              onChange={(e) => setAnnouncementDraft(e.target.value)}
+              placeholder="Type a global announcement..."
+              maxLength={220}
+            />
+            {adminError && <div className="name-error-text">{adminError}</div>}
+            <button
+              className="button button-primary"
+              type="button"
+              onClick={async () => {
+                try {
+                  await updateAnnouncement(adminPassword, announcementDraft)
+                  setAnnouncement(announcementDraft)
+                  setShowAnnouncementEditor(false)
+                  setAdminError('')
+                  localStorage.setItem('announcement_admin_unlocked', 'true')
+                } catch (err) {
+                  setAdminError('Wrong password or failed to update announcement.')
+                }
+              }}
+            >
+              Enter
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <div className="announcement-bar">
+      <span className="announcement-label">Announcement:</span>
+      <span className="announcement-text">{announcement}</span>
     </div>
-  </div>
-)}
 
-
-{showAdminLogin && (
-  <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
-    <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
-      <div className="policy-header">
-        <h3 className="policy-title">Admin Access</h3>
-        <button
-          className="policy-close"
-          type="button"
-          onClick={() => setShowAdminLogin(false)}
-          aria-label="Close admin login"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="policy-content">
-        <input
-          className="text-input"
-          type="password"
-          value={adminPassword}
-          onChange={(e) => setAdminPassword(e.target.value)}
-          placeholder="Enter password"
-        />
-        {adminError && <div className="name-error-text">{adminError}</div>}
-        <button
-          className="button button-primary"
-          type="button"
-          onClick={() => {
-            if (!adminPassword.trim()) {
-              setAdminError('Enter the admin password.')
-              return
-            }
-            setAdminError('')
-            setShowAdminLogin(false)
-            setShowAnnouncementEditor(true)
-          }}
-        >
-          Enter
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-      {showAnnouncementEditor && (
-  <div className="policy-overlay" onClick={() => setShowAnnouncementEditor(false)}>
-    <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
-      <div className="policy-header">
-        <h3 className="policy-title">Update Announcement</h3>
-        <button
-          className="policy-close"
-          type="button"
-          onClick={() => setShowAnnouncementEditor(false)}
-          aria-label="Close announcement editor"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="policy-content">
-        <textarea
-          className="announcement-editor"
-          value={announcementDraft}
-          onChange={(e) => setAnnouncementDraft(e.target.value)}
-          placeholder="Type a global announcement..."
-          maxLength={220}
-        />
-        {adminError && <div className="name-error-text">{adminError}</div>}
-        <button
-          className="button button-primary"
-          type="button"
-          onClick={async () => {
-            try {
-              await updateAnnouncement(adminPassword, announcementDraft)
-              setAnnouncement(announcementDraft)
-              setShowAnnouncementEditor(false)
-              setAdminError('')
-              localStorage.setItem('announcement_admin_unlocked', 'true')
-            } catch (err) {
-              setAdminError('Wrong password or failed to update announcement.')
-            }
-          }}
-        >
-          Enter
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-      </div>
-<div className="announcement-bar">
-  <span className="announcement-label">Announcement:</span>
-  <span className="announcement-text">{announcement}</span>
-</div>
-
-      
-      <div className="container">
+    <div className="container">
         <div className="grid">
           <section className="card">
             <div className="card-inner">
