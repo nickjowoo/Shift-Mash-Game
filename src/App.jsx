@@ -431,6 +431,7 @@ export default function App() {
           <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
           <div className="footer-year">2026</div>
         </footer>
+    </div>
       </div>
     </div>
   )
