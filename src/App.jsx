@@ -18,7 +18,7 @@ const CALLOUTS = [
   'Left! Right! Left! Right!',
   'Shift into overdrive!',
   'Do not let the keyboard win!',
-  'You are cooking!'
+  'You are cooking!',
 ]
 
 const RANKS = [
@@ -28,7 +28,7 @@ const RANKS = [
   { min: 300, label: 'Master', textClass: 'rank-master', borderClass: 'border-master' },
   { min: 200, label: 'Pro', textClass: 'rank-pro', borderClass: 'border-pro' },
   { min: 100, label: 'Rookie', textClass: 'rank-rookie', borderClass: 'border-rookie' },
-  { min: 0, label: 'Unranked', textClass: 'rank-unranked', borderClass: 'border-unranked' }
+  { min: 0, label: 'Unranked', textClass: 'rank-unranked', borderClass: 'border-unranked' },
 ]
 
 function getRank(score) {
@@ -48,6 +48,26 @@ function isSupabaseConfigured() {
   )
 }
 
+function getCurrentCycleStart() {
+  const now = Date.now()
+  return Math.floor(now / RESET_MS) * RESET_MS
+}
+
+function getNextResetTime() {
+  return getCurrentCycleStart() + RESET_MS
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
+
 async function supabaseRequest(path, options = {}) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
@@ -56,8 +76,8 @@ async function supabaseRequest(path, options = {}) {
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
-      ...(options.headers || {})
-    }
+      ...(options.headers || {}),
+    },
   })
 
   if (!response.ok) {
@@ -69,6 +89,7 @@ async function supabaseRequest(path, options = {}) {
   if (contentType.includes('application/json')) {
     return response.json()
   }
+
   return null
 }
 
@@ -85,26 +106,8 @@ async function fetchGlobalLeaderboard() {
 async function insertGlobalScore(name, score) {
   return supabaseRequest(SUPABASE_TABLE, {
     method: 'POST',
-    body: JSON.stringify([{ name, score }])
+    body: JSON.stringify([{ name, score }]),
   })
-}
-function getCurrentCycleStart() {
-  const now = Date.now()
-  return Math.floor(now / RESET_MS) * RESET_MS
-}
-
-function getNextResetTime() {
-  return getCurrentCycleStart() + RESET_MS
-}
-
-function formatCountdown(ms) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  return `${hours.toString().padStart(2, '0')}:${minutes
-    .toString()
-    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 export default function App() {
@@ -155,15 +158,15 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-  const updateCountdown = () => {
-    const remaining = getNextResetTime() - Date.now()
-    setResetCountdown(formatCountdown(remaining))
-  }
+    const updateCountdown = () => {
+      const remaining = getNextResetTime() - Date.now()
+      setResetCountdown(formatCountdown(remaining))
+    }
 
-  updateCountdown()
-  const interval = setInterval(updateCountdown, 1000)
-  return () => clearInterval(interval)
-}, [])
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -240,6 +243,7 @@ export default function App() {
         finishGame()
         return
       }
+
       gameTimerRef.current = requestAnimationFrame(tick)
     }
 
@@ -287,7 +291,6 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="container">
-
         <div className="grid">
           <section className="card">
             <div className="card-inner">
@@ -298,6 +301,7 @@ export default function App() {
                     Smash <strong>LShift</strong> and <strong>RShift</strong> as fast as you can in 20 seconds.
                   </p>
                 </div>
+
                 <div className="rank-badge">
                   <div className="label-small">Current Rank</div>
                   <div className={`rank-text ${rank.textClass}`}>{rank.label}</div>
@@ -383,11 +387,12 @@ export default function App() {
                 <div>
                   <h2 className="side-title">Global Leaderboard</h2>
                   <div className="side-subtitle">
-  
-  <br />
-  <span className="reset-text">Resets in {resetCountdown}</span>
-</div>
+                    Shared by everyone using your deployed game link.
+                    <br />
+                    <span className="reset-text">Resets in {resetCountdown}</span>
+                  </div>
                 </div>
+
                 <button className="button button-secondary" onClick={loadLeaderboard}>
                   Refresh
                 </button>
@@ -403,14 +408,19 @@ export default function App() {
                 ) : (
                   leaderboard.map((entry, index) => {
                     const entryRank = getRank(entry.score)
+
                     return (
-                      <div key={entry.id ?? `${entry.name}-${entry.score}-${index}`} className={`leaderboard-item ${entryRank.borderClass}`}>
+                      <div
+                        key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
+                        className={`leaderboard-item ${entryRank.borderClass}`}
+                      >
                         <div className="space-between">
                           <div>
                             <div className="place">#{index + 1}</div>
                             <div className="player-name">{entry.name}</div>
                             <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
                           </div>
+
                           <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
                         </div>
                       </div>
@@ -420,18 +430,17 @@ export default function App() {
               </div>
 
               <div className="setup-box" style={{ marginTop: '14px' }}>
-                Rank thresholds: 100 Rookie, 200 Pro, 300 Master, 400 Grandmaster, 500 Legendary, 600 Radiant.
+                Rank thresholds: 100 Rookie, 200 Pro, 300 Master, 400 Grandmaster, 500 Legendary,
+                600 Radiant.
               </div>
             </div>
           </aside>
         </div>
-                </div>
 
         <footer className="site-footer">
           <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
           <div className="footer-year">2026</div>
         </footer>
-    </div>
       </div>
     </div>
   )
