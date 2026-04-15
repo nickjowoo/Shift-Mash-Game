@@ -525,7 +525,7 @@ const submitScore = async () => {
                 <div className="player-kpm">{keysPerMinute} keys/min</div>
               </div>
 
-              <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
+              <div className={`player-score score-animated ${entryRank.textClass}`}>{entry.score}</div>
             </div>
           </div>
         )
@@ -545,9 +545,9 @@ const submitScore = async () => {
           {Math.round(playerPosition.entry.score * 3)} keys/min
         </div>
       </div>
-      <div className={`player-position-score ${getRank(playerPosition.entry.score).textClass}`}>
-        {playerPosition.entry.score}
-      </div>
+      <div className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}>
+  {playerPosition.entry.score}
+</div>
     </div>
   ) : (
     <div className="player-position-empty">
