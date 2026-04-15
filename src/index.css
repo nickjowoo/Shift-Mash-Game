@@ -167,6 +167,10 @@ input {
   line-height: 1;
   pointer-events: none;
 }
+.score-animated {
+  display: inline-block;
+  animation: scoreGlow 1.8s ease-in-out infinite;
+}
 
 .countdown-score {
   color: #ffffff;
@@ -573,6 +577,24 @@ input {
   font-size: 0.64rem;
   color: #94a3b8;
   letter-spacing: 0.08em;
+}
+
+@keyframes scoreGlow {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    transform: scale(1.06);
+    filter: brightness(1.18);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+    text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 @keyframes gradient {
