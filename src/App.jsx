@@ -445,9 +445,7 @@ const submitScore = async () => {
                 </button>
 
                 <div className="info-box">
-                  Objective: press LShift and RShift as fast as possible for 20 seconds and try to
-                  earn a top spot on the global leaderboard. Each leaderboard entry shows the
-                  player’s score and keys per minute.
+                  Mash your keys and try to earn a top spot on the global leaderboard. ARE YOU FAST ENOUGH?
                 </div>
               </div>
 
