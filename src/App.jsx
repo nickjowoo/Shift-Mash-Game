@@ -68,6 +68,20 @@ function formatCountdown(ms) {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
+function detectMobileDevice() {
+  if (typeof navigator === 'undefined') return false
+
+  const ua = navigator.userAgent || ''
+  const mobileUa =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+
+  return mobileUa || navigator.maxTouchPoints > 1
+}
+
+function getDeviceIcon(deviceType) {
+  return deviceType === 'mobile' ? '📱' : '💻'
+}
+
 async function supabaseRequest(path, options = {}) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
@@ -96,17 +110,17 @@ async function supabaseRequest(path, options = {}) {
 async function fetchGlobalLeaderboard() {
   const cycleStart = new Date(getCurrentCycleStart()).toISOString()
   const query =
-    `${SUPABASE_TABLE}?select=id,name,score,created_at` +
+    `${SUPABASE_TABLE}?select=id,name,score,created_at,device_type` +
     `&created_at=gte.${encodeURIComponent(cycleStart)}` +
     `&order=score.desc,created_at.asc&limit=${MAX_LEADERBOARD}`
 
   return supabaseRequest(query, { method: 'GET' })
 }
 
-async function insertGlobalScore(name, score) {
+async function insertGlobalScore(name, score, deviceType) {
   return supabaseRequest(SUPABASE_TABLE, {
     method: 'POST',
-    body: JSON.stringify([{ name, score }]),
+    body: JSON.stringify([{ name, score, device_type: deviceType }]),
   })
 }
 
@@ -124,6 +138,7 @@ export default function App() {
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardError, setLeaderboardError] = useState('')
   const [resetCountdown, setResetCountdown] = useState('')
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -133,6 +148,10 @@ export default function App() {
   const rank = useMemo(() => getRank(score), [score])
   const finishedRank = useMemo(() => getRank(score), [score])
   const cloudReady = isSupabaseConfigured()
+
+  useEffect(() => {
+    setIsMobileDevice(detectMobileDevice())
+  }, [])
 
   const loadLeaderboard = async () => {
     if (!cloudReady) {
@@ -207,6 +226,12 @@ export default function App() {
     }
   }, [phase])
 
+  const registerPress = (keyLabel) => {
+    if (phase !== 'playing') return
+    setScore((prev) => prev + 1)
+    setLastKey(keyLabel)
+  }
+
   const beginGame = () => {
     setScore(0)
     setTimeLeft(GAME_DURATION)
@@ -280,7 +305,7 @@ export default function App() {
 
     try {
       setLeaderboardError('')
-      await insertGlobalScore(finalName, score)
+      await insertGlobalScore(finalName, score, isMobileDevice ? 'mobile' : 'desktop')
       setSavedThisRound(true)
       await loadLeaderboard()
     } catch (error) {
@@ -339,6 +364,27 @@ export default function App() {
                 </div>
               </div>
 
+              {isMobileDevice && (
+                <div className="mobile-controls">
+                  <button
+                    className="mobile-mash-button"
+                    onTouchStart={() => registerPress('LTap')}
+                    onMouseDown={() => registerPress('LTap')}
+                    disabled={phase !== 'playing'}
+                  >
+                    L
+                  </button>
+                  <button
+                    className="mobile-mash-button"
+                    onTouchStart={() => registerPress('RTap')}
+                    onMouseDown={() => registerPress('RTap')}
+                    disabled={phase !== 'playing'}
+                  >
+                    R
+                  </button>
+                </div>
+              )}
+
               <div className="controls">
                 <button
                   className="button button-primary"
@@ -353,7 +399,9 @@ export default function App() {
                 </button>
 
                 <div className="info-box">
-                  Press both Shift keys as fast as you want. Key mashing is fully allowed. ARE YOU FAST ENUFF?
+                  Objective: press LShift and RShift as fast as possible for 20 seconds and try to
+                  earn a top spot on the global leaderboard. Each leaderboard entry shows the
+                  player’s score and keys per minute.
                 </div>
               </div>
 
@@ -414,6 +462,8 @@ export default function App() {
                 ) : (
                   leaderboard.map((entry, index) => {
                     const entryRank = getRank(entry.score)
+                    const deviceIcon = getDeviceIcon(entry.device_type)
+                    const keysPerMinute = Math.round(entry.score * 3)
 
                     return (
                       <div
@@ -422,11 +472,13 @@ export default function App() {
                       >
                         <div className="space-between">
                           <div>
-  <div className="place">#{index + 1}</div>
-  <div className="player-name">{entry.name}</div>
-  <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
-  <div className="player-kpm">{Math.round(entry.score * 3)} keys/min</div>
-</div>
+                            <div className="place">
+                              #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                            </div>
+                            <div className="player-name">{entry.name}</div>
+                            <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
+                            <div className="player-kpm">{keysPerMinute} keys/min</div>
+                          </div>
 
                           <div className={`player-score ${entryRank.textClass}`}>{entry.score}</div>
                         </div>
