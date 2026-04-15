@@ -246,6 +246,7 @@ const [showAnnouncementEditor, setShowAnnouncementEditor] = useState(false)
 const [adminPassword, setAdminPassword] = useState('')
 const [announcementDraft, setAnnouncementDraft] = useState('')
 const [adminError, setAdminError] = useState('')
+  
 
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -547,7 +548,37 @@ const [adminError, setAdminError] = useState('')
         >
           ×
         </button>
-        {showAdminLogin && (
+      <div className="policy-content">
+        <p>
+          This game collects the name you choose for the leaderboard, your score,
+          your device type, and the time your score was submitted.
+        </p>
+        <p>
+          This information is used only to run the leaderboard, show player rankings,
+          calculate total presses, and support the game’s features.
+        </p>
+        <p>
+          Scores and leaderboard information are stored using Supabase and the site is
+          hosted through Vercel. Basic technical information, such as IP address and
+          browser/device data, may also be processed by those services as part of normal
+          site operation.
+        </p>
+        <p>
+          This site does not currently use accounts, payments, or targeted advertising.
+          If the site changes in the future, this policy may be updated.
+        </p>
+        <p>
+          By submitting a name to the leaderboard, you agree to display that name and
+          score publicly within the game.
+        </p>
+        <p className="policy-effective">Effective date: 2026</p>
+      </div>
+    </div>
+  </div>
+)}
+
+
+{showAdminLogin && (
   <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
     <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
       <div className="policy-header">
@@ -640,34 +671,8 @@ const [adminError, setAdminError] = useState('')
   <span className="announcement-label">Announcement:</span>
   <span className="announcement-text">{announcement}</span>
 </div>
-      <div className="policy-content">
-        <p>
-          This game collects the name you choose for the leaderboard, your score,
-          your device type, and the time your score was submitted.
-        </p>
-        <p>
-          This information is used only to run the leaderboard, show player rankings,
-          calculate total presses, and support the game’s features.
-        </p>
-        <p>
-          Scores and leaderboard information are stored using Supabase and the site is
-          hosted through Vercel. Basic technical information, such as IP address and
-          browser/device data, may also be processed by those services as part of normal
-          site operation.
-        </p>
-        <p>
-          This site does not currently use accounts, payments, or targeted advertising.
-          If the site changes in the future, this policy may be updated.
-        </p>
-        <p>
-          By submitting a name to the leaderboard, you agree to display that name and
-          score publicly within the game.
-        </p>
-        <p className="policy-effective">Effective date: 2026</p>
-      </div>
-    </div>
-  </div>
-)}
+
+      
       <div className="container">
         <div className="grid">
           <section className="card">
