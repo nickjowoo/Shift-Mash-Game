@@ -691,6 +691,18 @@ input {
   color: #94a3b8;
   letter-spacing: 0.08em;
 }
+.community-total {
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.community-total-value {
+  font-weight: 900;
+  color: #93c5fd;
+  text-shadow: 0 0 8px rgba(147, 197, 253, 0.2);
+}
 
 @keyframes scoreGlow {
   0% {
