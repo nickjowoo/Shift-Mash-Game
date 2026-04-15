@@ -644,9 +644,20 @@ input {
 }
 
 .rank-radiant {
-  background: linear-gradient(90deg, #ff0040, #ff7b00, #ffee00, #00ff85, #00c2ff, #7a5cff, #ff00b3);
-  background-size: 260% 100%;
-  animation: shineLoop 3.4s linear infinite;
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    #ff0040 0%,
+    #ff7b00 14%,
+    #ffee00 28%,
+    #00ff85 42%,
+    #00c2ff 56%,
+    #7a5cff 70%,
+    #ff00b3 84%,
+    #ff0040 100%
+  );
+  background-size: 300% 100%;
+  animation: shineLoopSmooth 3.4s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -654,9 +665,17 @@ input {
 
 .rank-hacker {
   display: inline-block;
-  background: linear-gradient(90deg, #7cff7c, #00ff66, #0b0b0b, #39ff14, #0f0f0f, #7cff7c);
-  background-size: 240% 100%;
-  animation: shineLoop 2.8s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
+  background: linear-gradient(
+    90deg,
+    #7cff7c 0%,
+    #00ff66 18%,
+    #0b0b0b 36%,
+    #39ff14 54%,
+    #0f0f0f 72%,
+    #7cff7c 100%
+  );
+  background-size: 280% 100%;
+  animation: shineLoopSmooth 3.6s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -825,6 +844,14 @@ input {
   }
   100% {
     background-position: 200% 50%;
+  }
+}
+@keyframes shineLoopSmooth {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
   }
 }
 
