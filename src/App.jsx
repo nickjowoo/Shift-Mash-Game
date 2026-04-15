@@ -503,7 +503,7 @@ export default function App() {
             <div className="card-inner">
               <div className="header-row">
                 <div>
-                  <h1 className="title">Shift Mash Arena</h1>
+                  <h1 className="title">Shift Mash Arena ⬆️</h1>
                   <p className="subtitle">
                     Smash <strong>LShift</strong> and <strong>RShift</strong> as fast as you can in 20 seconds.
                   </p>
@@ -669,7 +669,7 @@ export default function App() {
             <div className="card-inner">
               <div className="leaderboard-head">
                 <div>
-                  <h2 className="side-title">Global Leaderboard</h2>
+                  <h2 className="side-title">Global Leaderboard 👑</h2>
                   <div className="side-subtitle reset-row">
   <span className="reset-icon" aria-hidden="true">🕒</span>
   <span className="reset-text">Refreshes every 48h</span>
