@@ -666,110 +666,113 @@ export default function App() {
           </section>
 
           <aside className="card">
-            <div className="card-inner">
-              <div className="leaderboard-head">
-                <div>
-                  <h2 className="side-title">Global Leaderboard 👑</h2>
-                  <div className="side-subtitle reset-row">
-  <span className="reset-icon" aria-hidden="true">🕒</span>
-  <span className="reset-text">Refreshes every 48h</span>
-  <span className="reset-text">•</span>
-  <span className="reset-text">Resets in {resetCountdown}</span>
-</div>
-                </div>
-
-                <button className="button button-secondary" onClick={loadLeaderboard}>
-                  Refresh
-                </button>
-              </div>
-
-              {leaderboardError && <div className="error-box">{leaderboardError}</div>}
-
-              <div className="leaderboard-scroll">
-                <div className="leaderboard-list">
-                  {leaderboardLoading ? (
-                    <div className="empty-box">Loading leaderboard...</div>
-                  ) : leaderboard.length === 0 ? (
-                    <div className="empty-box">No global scores yet. Be the first.</div>
-                  ) : (
-                    leaderboard.map((entry, index) => {
-                      const entryRank = getRank(entry.score)
-                      const deviceIcon = getDeviceIcon(entry.device_type)
-                      const keysPerMinute = Math.round(entry.score * 3)
-
-                      return (
-                        <div
-    key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
-    className={`leaderboard-item ${
-      index === 0
-        ? 'border-gold'
-        : index === 1
-        ? 'border-silver'
-        : index === 2
-        ? 'border-bronze'
-        : entryRank.borderClass
-    }`}
-  >
-                          <div className="space-between">
-                            <div>
-                              <div className="place">
-                              {index === 0 && <span className="place-medal">🥇</span>}
-                              {index === 1 && <span className="place-medal">🥈</span>}
-                              {index === 2 && <span className="place-medal">🥉</span>}
-                              #{index + 1} <span className="device-icon">{deviceIcon}</span>
-                              </div>
-                              <div className="player-name">{entry.name}</div>
-                              <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
-                              <div className="player-kpm">{keysPerMinute} keys/min</div>
-                            </div>
-
-                            <div className={`player-score score-animated ${entryRank.textClass}`}>
-                              {entry.score}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              </div>
-              <div
-  className={`player-position-card ${
-    playerPosition?.position === 1
-      ? 'border-gold'
-      : playerPosition?.position === 2
-      ? 'border-silver'
-      : playerPosition?.position === 3
-      ? 'border-bronze'
-      : ''
-  }`}
->
-  <div className="player-position-title">Your Position</div>
-  {playerPosition ? (
-    <div className="player-position-row">
+  <div className="card-inner">
+    <div className="leaderboard-head">
       <div>
-        <div className="player-position-place">
-          {playerPosition.position === 1 && '🥇 '}
-          {playerPosition.position === 2 && '🥈 '}
-          {playerPosition.position === 3 && '🥉 '}
-          #{playerPosition.position}
-        </div>
-        <div className="player-position-name">{playerPosition.entry.name}</div>
-        <div className="player-position-kpm">
-          {Math.round(playerPosition.entry.score * 3)} keys/min
+        <h2 className="side-title">Global Leaderboard 👑</h2>
+        <div className="side-subtitle reset-row">
+          <span className="reset-icon" aria-hidden="true">🕒</span>
+          <span className="reset-text">Refreshes every 48h</span>
+          <span className="reset-text">•</span>
+          <span className="reset-text">Resets in {resetCountdown}</span>
         </div>
       </div>
-      <div
-        className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}
-      >
-        {playerPosition.entry.score}
+
+      <button className="button button-secondary" onClick={loadLeaderboard}>
+        Refresh
+      </button>
+    </div>
+
+    {leaderboardError && <div className="error-box">{leaderboardError}</div>}
+
+    <div className="leaderboard-scroll">
+      <div className="leaderboard-list">
+        {leaderboardLoading ? (
+          <div className="empty-box">Loading leaderboard...</div>
+        ) : leaderboard.length === 0 ? (
+          <div className="empty-box">No global scores yet. Be the first.</div>
+        ) : (
+          leaderboard.map((entry, index) => {
+            const entryRank = getRank(entry.score)
+            const deviceIcon = getDeviceIcon(entry.device_type)
+            const keysPerMinute = Math.round(entry.score * 3)
+
+            return (
+              <div
+                key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
+                className={`leaderboard-item ${
+                  index === 0
+                    ? 'border-gold'
+                    : index === 1
+                    ? 'border-silver'
+                    : index === 2
+                    ? 'border-bronze'
+                    : entryRank.borderClass
+                }`}
+              >
+                <div className="space-between">
+                  <div>
+                    <div className="place">
+                      {index === 0 && <span className="place-medal">🥇</span>}
+                      {index === 1 && <span className="place-medal">🥈</span>}
+                      {index === 2 && <span className="place-medal">🥉</span>}
+                      #{index + 1} <span className="device-icon">{deviceIcon}</span>
+                    </div>
+                    <div className="player-name">{entry.name}</div>
+                    <div className={`player-rank ${entryRank.textClass}`}>{entryRank.label}</div>
+                    <div className="player-kpm">{keysPerMinute} keys/min</div>
+                  </div>
+
+                  <div className={`player-score score-animated ${entryRank.textClass}`}>
+                    {entry.score}
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
-  ) : (
-    <div className="player-position-empty">Save a score to see your position here.</div>
-  )}
-</div>
 
+    <div
+      className={`player-position-card ${
+        playerPosition?.position === 1
+          ? 'border-gold'
+          : playerPosition?.position === 2
+          ? 'border-silver'
+          : playerPosition?.position === 3
+          ? 'border-bronze'
+          : ''
+      }`}
+    >
+      <div className="player-position-title">Your Position</div>
+      {playerPosition ? (
+        <div className="player-position-row">
+          <div>
+            <div className="player-position-place">
+              {playerPosition.position === 1 && '🥇 '}
+              {playerPosition.position === 2 && '🥈 '}
+              {playerPosition.position === 3 && '🥉 '}
+              #{playerPosition.position}
+            </div>
+            <div className="player-position-name">{playerPosition.entry.name}</div>
+            <div className="player-position-kpm">
+              {Math.round(playerPosition.entry.score * 3)} keys/min
+            </div>
+          </div>
+
+          <div
+            className={`player-position-score score-animated ${getRank(playerPosition.entry.score).textClass}`}
+          >
+            {playerPosition.entry.score}
+          </div>
+        </div>
+      ) : (
+        <div className="player-position-empty">Save a score to see your position here.</div>
+      )}
+    </div>
+  </div>
+</aside>
         <footer className="site-footer">
   <div className="community-total">
     All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
