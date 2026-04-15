@@ -330,6 +330,7 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
       console.error('Could not load total presses', error)
     }
   }
+  
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
@@ -351,7 +352,7 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
 
   initAnnouncement()
 
-  const { createClient } = window.supabaseLib || {}
+  const { createClient } = window.supabase || {}
   if (!createClient) return
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
