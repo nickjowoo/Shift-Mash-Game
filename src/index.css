@@ -647,17 +647,17 @@ input {
   display: inline-block;
   background: linear-gradient(
     90deg,
-    #ff0040 0%,
-    #ff7b00 14%,
-    #ffee00 28%,
-    #00ff85 42%,
-    #00c2ff 56%,
-    #7a5cff 70%,
-    #ff00b3 84%,
-    #ff0040 100%
+    #00ff85 0%,
+    #00c2ff 16%,
+    #7a5cff 32%,
+    #ff00b3 48%,
+    #ff0040 64%,
+    #ff7b00 78%,
+    #ffee00 90%,
+    #00ff85 100%
   );
-  background-size: 300% 100%;
-  animation: shineLoopSmooth 3.4s linear infinite;
+  background-size: 260% 100%;
+  animation: shineLoopSmooth 3.6s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -667,22 +667,21 @@ input {
   display: inline-block;
   background: linear-gradient(
     90deg,
-    #7cff7c 0%,
-    #00ff66 18%,
-    #0b0b0b 36%,
-    #39ff14 54%,
+    #39ff14 0%,
+    #7cff7c 18%,
+    #00ff66 36%,
+    #0b0b0b 54%,
     #0f0f0f 72%,
-    #7cff7c 100%
+    #39ff14 100%
   );
-  background-size: 280% 100%;
-  animation: shineLoopSmooth 3.6s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
+  background-size: 240% 100%;
+  animation: shineLoopSmooth 4s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-shadow:
     0.02em 0 0 rgba(0, 255, 102, 0.28),
     -0.02em 0 0 rgba(124, 255, 124, 0.18);
-  will-change: transform, filter, background-position;
 }
 
 .border-noob {
