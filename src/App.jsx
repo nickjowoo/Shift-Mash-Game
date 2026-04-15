@@ -387,8 +387,6 @@ export default function App() {
                 <div>
                   <h2 className="side-title">Global Leaderboard</h2>
                   <div className="side-subtitle">
-                    Shared by everyone using your deployed game link.
-                    <br />
                     <span className="reset-text">Resets in {resetCountdown}</span>
                   </div>
                 </div>
@@ -429,10 +427,7 @@ export default function App() {
                 )}
               </div>
 
-              <div className="setup-box" style={{ marginTop: '14px' }}>
-                Rank thresholds: 100 Rookie, 200 Pro, 300 Master, 400 Grandmaster, 500 Legendary,
-                600 Radiant.
-              </div>
+
             </div>
           </aside>
         </div>
