@@ -699,9 +699,17 @@ export default function App() {
 
                       return (
                         <div
-                          key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
-                          className={`leaderboard-item ${entryRank.borderClass}`}
-                        >
+    key={entry.id ?? `${entry.name}-${entry.score}-${index}`}
+    className={`leaderboard-item ${
+      index === 0
+        ? 'border-gold'
+        : index === 1
+        ? 'border-silver'
+        : index === 2
+        ? 'border-bronze'
+        : entryRank.borderClass
+    }`}
+  >
                           <div className="space-between">
                             <div>
                               <div className="place">
@@ -726,7 +734,20 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="player-position-card">
+              <div
+  className={`player-position-card ${
+    playerPosition?.position === 1
+      ? 'border-gold'
+      : playerPosition?.position === 2
+      ? 'border-silver'
+      : playerPosition?.position === 3
+      ? 'border-bronze'
+      : ''
+  }`}
+>
+  <div className="player-position-title">Your Position</div>
+  {playerPosition ? (
+    <div className="player-position-row">
                 <div className="player-position-title">Your Position</div>
                 {playerPosition ? (
                   <div className="player-position-row">
