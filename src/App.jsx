@@ -383,7 +383,7 @@ export default function App() {
                 <div>
                   <h2 className="side-title">Global Leaderboard</h2>
                   <div className="side-subtitle">
-  Made by Nick W., Kyle S., Felipe L.P.
+  
   <br />
   <span className="reset-text">Resets in {resetCountdown}</span>
 </div>
@@ -425,6 +425,12 @@ export default function App() {
             </div>
           </aside>
         </div>
+                </div>
+
+        <footer className="site-footer">
+          <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+          <div className="footer-year">2026</div>
+        </footer>
       </div>
     </div>
   )
