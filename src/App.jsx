@@ -22,6 +22,7 @@ const CALLOUTS = [
 ]
 
 const RANKS = [
+  { min: 700, label: 'Hacker', textClass: 'rank-hacker', borderClass: 'border-hacker' },
   { min: 600, label: 'Radiant', textClass: 'rank-radiant', borderClass: 'border-radiant' },
   { min: 500, label: 'Legendary', textClass: 'rank-legendary', borderClass: 'border-legendary' },
   { min: 400, label: 'Grandmaster', textClass: 'rank-grandmaster', borderClass: 'border-grandmaster' },
@@ -374,40 +375,48 @@ const submitScore = async () => {
     <div className="rank-info-popover">
       <div className="rank-info-title">Rank Values</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-noob">Noob</span>
-        <span className="rank-info-range">0–99</span>
-      </div>
+<div className="rank-info-row rank-info-row-note">
+  <div>
+    <span className="rank-info-name rank-hacker">Hacker</span>
+    <div className="rank-info-subnote">you probably used a bot huh</div>
+  </div>
+  <span className="rank-info-range">700+</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-rookie">Rookie</span>
-        <span className="rank-info-range">100–199</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-radiant">Radiant</span>
+  <span className="rank-info-range">600–699</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-pro">Pro</span>
-        <span className="rank-info-range">200–299</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-legendary">Legendary</span>
+  <span className="rank-info-range">500–599</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-master">Master</span>
-        <span className="rank-info-range">300–399</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-grandmaster">Grandmaster</span>
+  <span className="rank-info-range">400–499</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-grandmaster">Grandmaster</span>
-        <span className="rank-info-range">400–499</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-master">Master</span>
+  <span className="rank-info-range">300–399</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-legendary">Legendary</span>
-        <span className="rank-info-range">500–599</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-pro">Pro</span>
+  <span className="rank-info-range">200–299</span>
+</div>
 
-      <div className="rank-info-row">
-        <span className="rank-info-name rank-radiant">Radiant</span>
-        <span className="rank-info-range">600+</span>
-      </div>
+<div className="rank-info-row">
+  <span className="rank-info-name rank-rookie">Rookie</span>
+  <span className="rank-info-range">100–199</span>
+</div>
+
+<div className="rank-info-row">
+  <span className="rank-info-name rank-noob">Noob</span>
+  <span className="rank-info-range">0–99</span>
+</div>
     </div>
   </div>
 </div>
