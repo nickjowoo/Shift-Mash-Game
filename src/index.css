@@ -354,6 +354,80 @@ input {
   padding: 11px 12px;
   background: rgba(30, 41, 59, 0.72);
 }
+.leaderboard-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 8px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 999px;
+}
+
+.player-position-card {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.92);
+}
+
+.player-position-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.player-position-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.player-position-place {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.player-position-name {
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.player-position-kpm {
+  font-size: 0.68rem;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.player-position-score {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.player-position-empty {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
 
 .place {
   color: #94a3b8;
