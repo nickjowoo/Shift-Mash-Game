@@ -611,45 +611,64 @@ const [adminToken, setAdminToken] = useState('')
     )}
 
     {showAdminLogin && (
-      <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
-        <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="policy-header">
-            <h3 className="policy-title">Admin Access</h3>
-            <button
-  className="button button-primary"
-  type="button"
-  onClick={async () => {
-    try {
-      const trimmedPassword = adminPassword.trim()
-
-      if (!trimmedPassword) {
-        setAdminError('Enter the admin password.')
-        return
-      }
-
-      setAdminError('')
-
-      const token = await verifyAnnouncementPassword(trimmedPassword)
-
-      setAdminToken(token)
-      setAdminPassword('')
-      setShowAdminLogin(false)
-      setShowAnnouncementEditor(true)
-      setAnnouncementDraft(announcement)
-    } catch (err) {
-      setAdminToken('')
-      setAdminError(
-        err instanceof Error ? err.message : 'Password verification failed'
-      )
-    }
-  }}
->
-  Enter
-</button>
-          </div>
-        </div>
+  <div className="policy-overlay" onClick={() => setShowAdminLogin(false)}>
+    <div className="policy-modal admin-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="policy-header">
+        <h3 className="policy-title">Admin Access</h3>
+        <button
+          className="policy-close"
+          type="button"
+          onClick={() => setShowAdminLogin(false)}
+          aria-label="Close admin login"
+        >
+          ×
+        </button>
       </div>
-    )}
+
+      <div className="policy-content">
+        <input
+          className="text-input"
+          type="password"
+          value={adminPassword}
+          onChange={(e) => setAdminPassword(e.target.value)}
+          placeholder="Enter password"
+        />
+        {adminError && <div className="name-error-text">{adminError}</div>}
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={async () => {
+            try {
+              const trimmedPassword = adminPassword.trim()
+
+              if (!trimmedPassword) {
+                setAdminError('Enter the admin password.')
+                return
+              }
+
+              setAdminError('')
+
+              const token = await verifyAnnouncementPassword(trimmedPassword)
+
+              setAdminToken(token)
+              setAdminPassword('')
+              setShowAdminLogin(false)
+              setShowAnnouncementEditor(true)
+              setAnnouncementDraft(announcement)
+            } catch (err) {
+              setAdminToken('')
+              setAdminError(
+                err instanceof Error ? err.message : 'Password verification failed'
+              )
+            }
+          }}
+        >
+          Enter
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
     {showAnnouncementEditor && (
       <div className="policy-overlay" onClick={() => setShowAnnouncementEditor(false)}>
