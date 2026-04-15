@@ -267,6 +267,24 @@ export default function App() {
     loadLeaderboard()
     loadTotalPresses()
   }, [])
+  useEffect(() => {
+  if (!cloudReady) return
+
+  let isLoading = false
+
+  const interval = setInterval(async () => {
+    if (isLoading) return
+    isLoading = true
+
+    try {
+      await loadTotalPresses()
+    } finally {
+      isLoading = false
+    }
+  }, 10000)
+
+  return () => clearInterval(interval)
+}, [cloudReady])
 
   useEffect(() => {
     const updateCountdown = () => {
