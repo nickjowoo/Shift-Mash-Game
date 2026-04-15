@@ -636,8 +636,8 @@ input {
 
 .rank-legendary {
   background: linear-gradient(90deg, #a855f7, #ec4899, #22d3ee, #8b5cf6);
-  background-size: 200% 200%;
-  animation: gradient 3s ease infinite;
+  background-size: 200% 100%;
+  animation: shineLoop 3.2s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -645,8 +645,8 @@ input {
 
 .rank-radiant {
   background: linear-gradient(90deg, #ff0040, #ff7b00, #ffee00, #00ff85, #00c2ff, #7a5cff, #ff00b3);
-  background-size: 300% 300%;
-  animation: gradient 2s linear infinite;
+  background-size: 260% 100%;
+  animation: shineLoop 2.4s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -654,8 +654,8 @@ input {
 
 .rank-hacker {
   background: linear-gradient(90deg, #7cff7c, #00ff66, #0b0b0b, #39ff14, #0f0f0f, #7cff7c);
-  background-size: 220% 220%;
-  animation: hackerGlitch 1.8s steps(2, end) infinite, gradient 3.5s linear infinite;
+  background-size: 240% 100%;
+  animation: shineLoop 2s linear infinite, hackerGlitch 1.8s steps(2, end) infinite;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -816,6 +816,14 @@ input {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+@keyframes shineLoop {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 @keyframes scoreGlow {
