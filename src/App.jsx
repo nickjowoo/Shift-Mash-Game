@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
 const MAX_LEADERBOARD = 10
-const RESET_HOURS = 48
+const RESET_HOURS = 24
 const RESET_MS = RESET_HOURS * 60 * 60 * 1000
 
 const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
@@ -59,14 +59,15 @@ function getNextResetTime() {
 }
 
 function formatCountdown(ms) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
+  const totalHours = Math.max(0, Math.floor(ms / (1000 * 60 * 60)))
+  const days = Math.floor(totalHours / 24)
+  const hours = totalHours % 24
 
-  return `${hours.toString().padStart(2, '0')}:${minutes
-    .toString()
-    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  if (days > 0) {
+    return `${days}d ${hours}h`
+  }
+
+  return `${hours}h`
 }
 
 function detectMobileDevice() {
