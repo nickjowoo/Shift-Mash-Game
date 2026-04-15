@@ -277,8 +277,11 @@ const [announcementDraft, setAnnouncementDraft] = useState('')
 const [adminError, setAdminError] = useState('')
 const [adminToken, setAdminToken] = useState('')
 const [isAdminVerified, setIsAdminVerified] = useState(false)
-  
+const [rankFlash, setRankFlash] = useState(false)
 
+
+  
+  const prevRankRef = useRef(rank.label)
   const gameTimerRef = useRef(null)
   const countdownRef = useRef(null)
   const startStampRef = useRef(null)
@@ -331,7 +334,13 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
       console.error('Could not load total presses', error)
     }
   }
-  
+  useEffect(() => {
+  if (rank.label !== prevRankRef.current) {
+    prevRankRef.current = rank.label
+    setRankFlash(true)
+    setTimeout(() => setRankFlash(false), 600)
+  }
+}, [rank.label])
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
@@ -791,7 +800,7 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
                 </div>
               </div>
 
-              <div className={`callout-box ${rank.borderClass}`}>
+              <div className={`callout-box ${rank.borderClass} ${rankFlash ? 'rank-flash' : ''}`}>
   <div className="callout-label">Presses</div>
   <div className={`callout-score ${phase === 'countdown' ? 'countdown-score' : rank.textClass}`}>
     {mainDisplay}
