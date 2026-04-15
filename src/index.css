@@ -445,6 +445,29 @@ input {
   font-weight: 700;
   color: #93c5fd;
 }
+.reset-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reset-icon {
+  font-size: 0.82rem;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.reset-prefix {
+  font-size: 0.76rem;
+  color: #a3a3a3;
+  font-weight: 600;
+}
+
+.reset-dot {
+  font-size: 0.72rem;
+  color: #737373;
+}
 
 .error-box {
   margin-bottom: 10px;
