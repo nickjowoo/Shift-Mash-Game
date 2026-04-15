@@ -1,0 +1,468 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trophy, Timer, Zap, RotateCcw, Keyboard } from "lucide-react";
+
+const GAME_DURATION = 20;
+const PRE_COUNTDOWN = 3;
+const LEADERBOARD_KEY = "shiftMashLeaderboardV1";
+const MAX_LEADERBOARD = 8;
+
+const CALLOUTS = [
+  "Go, go, go!",
+  "You got this!",
+  "Keep going!",
+  "Mash faster!",
+  "Left! Right! Left! Right!",
+  "Shift into overdrive!",
+  "Do not let the keyboard win!",
+  "You are cooking!",
+];
+
+const RANKS = [
+  {
+    min: 600,
+    label: "Radiant",
+    textClass:
+      "bg-[linear-gradient(90deg,#ff0040,#ff7b00,#ffee00,#00ff85,#00c2ff,#7a5cff,#ff00b3)] bg-clip-text text-transparent animate-pulse",
+    glowClass: "shadow-[0_0_40px_rgba(255,255,255,0.45)]",
+    borderClass: "border-fuchsia-300/60",
+  },
+  {
+    min: 500,
+    label: "Legendary",
+    textClass:
+      "bg-[linear-gradient(90deg,#a855f7,#ec4899,#22d3ee,#8b5cf6)] bg-[length:200%_200%] animate-[gradient_3s_ease_infinite] bg-clip-text text-transparent",
+    glowClass: "shadow-[0_0_35px_rgba(168,85,247,0.45)]",
+    borderClass: "border-violet-300/60",
+  },
+  {
+    min: 400,
+    label: "Grandmaster",
+    textClass:
+      "bg-[linear-gradient(90deg,#dbeafe,#93c5fd,#e0f2fe,#bfdbfe)] bg-clip-text text-transparent",
+    glowClass: "shadow-[0_0_28px_rgba(191,219,254,0.45)]",
+    borderClass: "border-sky-200/60",
+  },
+  {
+    min: 300,
+    label: "Master",
+    textClass: "text-amber-300",
+    glowClass: "shadow-[0_0_25px_rgba(252,211,77,0.45)]",
+    borderClass: "border-amber-300/60",
+  },
+  {
+    min: 200,
+    label: "Pro",
+    textClass: "text-cyan-300",
+    glowClass: "shadow-[0_0_22px_rgba(103,232,249,0.38)]",
+    borderClass: "border-cyan-300/60",
+  },
+  {
+    min: 100,
+    label: "Rookie",
+    textClass: "text-slate-300",
+    glowClass: "shadow-[0_0_16px_rgba(203,213,225,0.24)]",
+    borderClass: "border-slate-400/40",
+  },
+  {
+    min: 0,
+    label: "Unranked",
+    textClass: "text-white",
+    glowClass: "shadow-none",
+    borderClass: "border-white/10",
+  },
+];
+
+function getRank(score) {
+  return RANKS.find((rank) => score >= rank.min) || RANKS[RANKS.length - 1];
+}
+
+function formatTime(value) {
+  return value.toFixed(1);
+}
+
+function loadLeaderboard() {
+  try {
+    const raw = localStorage.getItem(LEADERBOARD_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLeaderboard(entries) {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries));
+}
+
+export default function ShiftMashGame() {
+  const [phase, setPhase] = useState("idle"); // idle | countdown | playing | finished
+  const [countdown, setCountdown] = useState(PRE_COUNTDOWN);
+  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [score, setScore] = useState(0);
+  const [callout, setCallout] = useState("Ready to test your Shift speed?");
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [lastKey, setLastKey] = useState("-");
+  const [pulse, setPulse] = useState(0);
+  const [playerName, setPlayerName] = useState("");
+  const [nameDraft, setNameDraft] = useState("");
+  const [savedThisRound, setSavedThisRound] = useState(false);
+
+  const gameTimerRef = useRef(null);
+  const countdownRef = useRef(null);
+  const startStampRef = useRef(null);
+  const calloutTimerRef = useRef(null);
+
+  const rank = useMemo(() => getRank(score), [score]);
+  const finishedRank = useMemo(() => getRank(score), [score]);
+
+  useEffect(() => {
+    setLeaderboard(loadLeaderboard());
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      if (calloutTimerRef.current) clearInterval(calloutTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isShift = e.code === "ShiftLeft" || e.code === "ShiftRight";
+      if (!isShift || phase !== "playing") return;
+
+      setScore((prev) => prev + 1);
+      setLastKey(e.code === "ShiftLeft" ? "LShift" : "RShift");
+      setPulse((prev) => prev + 1);
+
+      if (Math.random() < 0.18) {
+        const randomCallout = CALLOUTS[Math.floor(Math.random() * CALLOUTS.length)];
+        setCallout(randomCallout);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+
+    if (calloutTimerRef.current) clearInterval(calloutTimerRef.current);
+    calloutTimerRef.current = setInterval(() => {
+      const randomCallout = CALLOUTS[Math.floor(Math.random() * CALLOUTS.length)];
+      setCallout(randomCallout);
+    }, 1800);
+
+    return () => {
+      if (calloutTimerRef.current) clearInterval(calloutTimerRef.current);
+    };
+  }, [phase]);
+
+  const beginGame = () => {
+    setScore(0);
+    setTimeLeft(GAME_DURATION);
+    setCountdown(PRE_COUNTDOWN);
+    setPhase("countdown");
+    setCallout("Get ready...");
+    setLastKey("-");
+    setSavedThisRound(false);
+
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          launchRound();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const launchRound = () => {
+    setPhase("playing");
+    setCallout("START!");
+    startStampRef.current = performance.now();
+
+    const tick = (now) => {
+      const elapsed = (now - startStampRef.current) / 1000;
+      const remaining = Math.max(0, GAME_DURATION - elapsed);
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        finishGame();
+        return;
+      }
+      gameTimerRef.current = requestAnimationFrame(tick);
+    };
+
+    gameTimerRef.current = requestAnimationFrame(tick);
+  };
+
+  const finishGame = () => {
+    if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current);
+    setTimeLeft(0);
+    setPhase("finished");
+    setCallout(score >= 300 ? "That was wild." : "Nice run.");
+  };
+
+  const resetGame = () => {
+    if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setPhase("idle");
+    setCountdown(PRE_COUNTDOWN);
+    setTimeLeft(GAME_DURATION);
+    setScore(0);
+    setCallout("Ready to test your Shift speed?");
+    setLastKey("-");
+    setSavedThisRound(false);
+  };
+
+  const submitScore = () => {
+    const finalName = nameDraft.trim() || playerName.trim() || "Player";
+    setPlayerName(finalName);
+
+    const newEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name: finalName,
+      score,
+      rank: finishedRank.label,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    const updated = [...leaderboard, newEntry]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, MAX_LEADERBOARD);
+
+    setLeaderboard(updated);
+    saveLeaderboard(updated);
+    setSavedThisRound(true);
+  };
+
+  const clearLeaderboard = () => {
+    setLeaderboard([]);
+    saveLeaderboard([]);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white [background-image:radial-gradient(circle_at_top,#1e3a8a_0%,#0f172a_35%,#020617_100%)]">
+      <style>{`
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+
+      <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 grid gap-4 lg:grid-cols-[1.6fr_0.9fr]"
+        >
+          <Card className="border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl">
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-3xl font-black tracking-tight text-white md:text-5xl">
+                    Shift Mash Arena
+                  </CardTitle>
+                  <p className="mt-2 text-base text-slate-200 md:text-lg">
+                    Smash <span className="font-bold text-white">LShift</span> and <span className="font-bold text-white">RShift</span> as fast as you can in 20 seconds.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-blue-300/20 bg-blue-400/10 px-4 py-3 text-right">
+                  <div className="text-xs uppercase tracking-[0.2em] text-blue-200">Current Rank</div>
+                  <div className={`text-2xl font-black ${rank.textClass}`}>{rank.label}</div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card className="border-white/10 bg-slate-800/60">
+                  <CardContent className="flex items-center gap-3 p-5">
+                    <Timer className="h-7 w-7 text-cyan-300" />
+                    <div>
+                      <div className="text-sm text-slate-300">Time Left</div>
+                      <div className="text-3xl font-black text-white">{formatTime(timeLeft)}s</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <motion.div
+                  key={pulse}
+                  initial={{ scale: 1 }}
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <Card className={`border-white/10 bg-slate-800/60 ${rank.glowClass}`}>
+                    <CardContent className="flex items-center gap-3 p-5">
+                      <Zap className="h-7 w-7 text-amber-300" />
+                      <div>
+                        <div className="text-sm text-slate-300">Live Count</div>
+                        <div className={`text-4xl font-black tracking-tight md:text-5xl ${rank.textClass}`}>
+                          {score}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <Card className="border-white/10 bg-slate-800/60">
+                  <CardContent className="flex items-center gap-3 p-5">
+                    <Keyboard className="h-7 w-7 text-emerald-300" />
+                    <div>
+                      <div className="text-sm text-slate-300">Last Key</div>
+                      <div className="text-3xl font-black text-white">{lastKey}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="mt-6 flex min-h-[120px] items-center justify-center rounded-3xl border border-white/10 bg-slate-800/40 px-6 py-8 text-center shadow-inner">
+                <AnimatePresence mode="wait">
+                  {phase === "countdown" ? (
+                    <motion.div
+                      key={`count-${countdown}`}
+                      initial={{ opacity: 0, scale: 0.7, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 1.3, y: -10 }}
+                      transition={{ duration: 0.35 }}
+                      className="text-6xl font-black text-white md:text-8xl"
+                    >
+                      {countdown > 0 ? countdown : "GO!"}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={callout}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      className="text-2xl font-extrabold text-cyan-100 md:text-4xl"
+                    >
+                      {callout}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button
+                  onClick={beginGame}
+                  disabled={phase === "countdown" || phase === "playing"}
+                  className="rounded-2xl bg-blue-600 px-6 py-6 text-base font-bold text-white hover:bg-blue-500"
+                >
+                  START
+                </Button>
+                <Button
+                  onClick={resetGame}
+                  variant="outline"
+                  className="rounded-2xl border-white/20 bg-transparent px-6 py-6 text-base font-bold text-white hover:bg-white/10"
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" /> Reset
+                </Button>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  Press both Shift keys as fast as you want. Key mashing is fully allowed.
+                </div>
+              </div>
+
+              {phase === "finished" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`mt-6 rounded-3xl border bg-slate-900/80 p-5 ${finishedRank.borderClass}`}
+                >
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="text-sm uppercase tracking-[0.2em] text-slate-300">Final Result</div>
+                      <div className={`mt-1 text-3xl font-black md:text-5xl ${finishedRank.textClass}`}>
+                        {score}
+                      </div>
+                      <div className="mt-2 text-lg text-slate-200">
+                        Rank: <span className={`font-extrabold ${finishedRank.textClass}`}>{finishedRank.label}</span>
+                      </div>
+                    </div>
+
+                    <div className="w-full max-w-sm space-y-3">
+                      <input
+                        value={nameDraft}
+                        onChange={(e) => setNameDraft(e.target.value)}
+                        placeholder="Enter a name for the leaderboard"
+                        className="w-full rounded-2xl border border-white/15 bg-slate-800 px-4 py-3 text-white outline-none placeholder:text-slate-400 focus:border-cyan-300"
+                      />
+                      <Button
+                        onClick={submitScore}
+                        disabled={savedThisRound}
+                        className="w-full rounded-2xl bg-emerald-600 py-6 text-base font-bold text-white hover:bg-emerald-500 disabled:opacity-50"
+                      >
+                        {savedThisRound ? "Saved to Leaderboard" : "Save Score"}
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2 text-2xl font-black text-white">
+                  <Trophy className="h-6 w-6 text-amber-300" /> Local Leaderboard
+                </CardTitle>
+                <Button
+                  onClick={clearLeaderboard}
+                  variant="outline"
+                  className="rounded-xl border-white/15 bg-transparent text-white hover:bg-white/10"
+                >
+                  Clear
+                </Button>
+              </div>
+              <p className="text-sm text-slate-300">Saved in this browser on this device.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {leaderboard.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-5 text-sm text-slate-300">
+                    No scores yet. Start a round and make history.
+                  </div>
+                ) : (
+                  leaderboard.map((entry, index) => {
+                    const entryRank = getRank(entry.score);
+                    return (
+                      <motion.div
+                        key={entry.id}
+                        initial={{ opacity: 0, x: 14 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`rounded-2xl border bg-slate-800/70 p-4 ${entryRank.borderClass}`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">#{index + 1}</div>
+                            <div className="text-lg font-bold text-white">{entry.name}</div>
+                            <div className={`text-sm font-semibold ${entryRank.textClass}`}>{entryRank.label}</div>
+                          </div>
+                          <div className={`text-3xl font-black ${entryRank.textClass}`}>{entry.score}</div>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-white/10 bg-slate-800/40 p-4 text-sm text-slate-300">
+                Rank thresholds: 100 Rookie, 200 Pro, 300 Master, 400 Grandmaster, 500 Legendary, 600 Radiant.
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
