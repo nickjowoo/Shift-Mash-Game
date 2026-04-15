@@ -551,4 +551,51 @@ input {
   .mobile-mash-button:disabled {
     opacity: 0.45;
   }
+  .intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(8px);
+  animation: introFadeOut 0.7s ease 1.5s forwards;
+  pointer-events: none;
+}
+
+.intro-card {
+  text-align: center;
+  padding: 24px 28px;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.intro-madeby {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.intro-names {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+@keyframes introFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 }
