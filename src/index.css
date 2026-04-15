@@ -458,16 +458,6 @@ input {
   opacity: 0.9;
 }
 
-.reset-prefix {
-  font-size: 0.76rem;
-  color: #a3a3a3;
-  font-weight: 600;
-}
-
-.reset-dot {
-  font-size: 0.72rem;
-  color: #737373;
-}
 
 .error-box {
   margin-bottom: 10px;
