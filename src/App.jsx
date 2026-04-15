@@ -177,17 +177,14 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (phase !== 'playing') return
+
     const handleKeyDown = (e) => {
       const isShift = e.code === 'ShiftLeft' || e.code === 'ShiftRight'
-      if (!isShift || phase !== 'playing') return
+      if (!isShift) return
 
       setScore((prev) => prev + 1)
       setLastKey(e.code === 'ShiftLeft' ? 'LShift' : 'RShift')
-
-      if (Math.random() < 0.18) {
-        const randomCallout = CALLOUTS[Math.floor(Math.random() * CALLOUTS.length)]
-        setCallout(randomCallout)
-      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -197,11 +194,13 @@ export default function App() {
   useEffect(() => {
     if (phase !== 'playing') return
 
-    if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
-    calloutTimerRef.current = setInterval(() => {
+    const setRandomCallout = () => {
       const randomCallout = CALLOUTS[Math.floor(Math.random() * CALLOUTS.length)]
       setCallout(randomCallout)
-    }, 1800)
+    }
+
+    setRandomCallout()
+    calloutTimerRef.current = setInterval(setRandomCallout, 5000)
 
     return () => {
       if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
@@ -231,7 +230,7 @@ export default function App() {
 
   const launchRound = () => {
     setPhase('playing')
-    setCallout('START!')
+    setCallout('Go, go, go!')
     startStampRef.current = performance.now()
 
     const tick = (now) => {
@@ -260,6 +259,7 @@ export default function App() {
   const resetGame = () => {
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (countdownRef.current) clearInterval(countdownRef.current)
+    if (calloutTimerRef.current) clearInterval(calloutTimerRef.current)
     setPhase('idle')
     setCountdown(PRE_COUNTDOWN)
     setTimeLeft(GAME_DURATION)
@@ -287,6 +287,9 @@ export default function App() {
       setLeaderboardError('Could not save your score online.')
     }
   }
+
+  const mainDisplay =
+    phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
 
   return (
     <div className="app-shell">
@@ -321,12 +324,18 @@ export default function App() {
               </div>
 
               <div className={`callout-box ${rank.borderClass}`}>
-                <div className={`callout-score ${rank.textClass}`}>{score}</div>
+                <div
+                  className={`callout-score ${
+                    phase === 'countdown' ? 'countdown-score' : rank.textClass
+                  }`}
+                >
+                  {mainDisplay}
+                </div>
+              </div>
 
+              <div className="motivation-wrap">
                 <div className="callout-bubble">
-                  <div className="callout-text">
-                    {phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : callout}
-                  </div>
+                  <div className="callout-text">{callout}</div>
                 </div>
               </div>
 
