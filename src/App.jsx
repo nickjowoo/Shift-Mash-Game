@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
@@ -336,7 +337,7 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
     setIsMobileDevice(detectMobileDevice())
   }, [])
   useEffect(() => {
-  let channel
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
   const initAnnouncement = async () => {
     try {
@@ -346,18 +347,11 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
     } catch (err) {
       console.error('Could not load announcement', err)
     }
-
-    if (window.supabase) return
   }
 
   initAnnouncement()
 
-  const { createClient } = window.supabase || {}
-  if (!createClient) return
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-  channel = supabase
+  const channel = supabase
     .channel('announcements-live')
     .on(
       'postgres_changes',
@@ -365,15 +359,12 @@ const [isAdminVerified, setIsAdminVerified] = useState(false)
       (payload) => {
         if (payload?.new?.message) {
           setAnnouncement(payload.new.message)
-          setAnnouncementDraft(payload.new.message)
         }
       }
     )
     .subscribe()
 
-  return () => {
-    if (channel) supabase.removeChannel(channel)
-  }
+  return () => supabase.removeChannel(channel)
 }, [])
 
   useEffect(() => {
