@@ -149,6 +149,41 @@ const SiteFooter = React.memo(function SiteFooter() {
     </footer>
   )
 })
+function isInappropriateName(name) {
+  const normalized = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+
+  const blockedTerms = [
+    'fuck',
+    'fucking',
+    'shit',
+    'bitch',
+    'asshole',
+    'dick',
+    'pussy',
+    'cunt',
+    'nigger',
+    'nigga',
+    'fag',
+    'faggot',
+    'slut',
+    'whore',
+    'porn',
+    'sex',
+    'rape',
+    'rapist',
+    'kill',
+    'suicide',
+    'hitler',
+    'nazi',
+    'n1gger',
+    'nigg3r',
+    'n1gg3r'
+  ]
+
+  return blockedTerms.some((term) => normalized.includes(term))
+}
 
 export default function App() {
   const [phase, setPhase] = useState('idle')
@@ -163,6 +198,7 @@ export default function App() {
   const [savedThisRound, setSavedThisRound] = useState(false)
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardError, setLeaderboardError] = useState('')
+  const [nameError, setNameError] = useState('')
   const [resetCountdown, setResetCountdown] = useState('')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [lastSubmittedId, setLastSubmittedId] = useState(null)
@@ -343,8 +379,15 @@ const playerPosition = useMemo(() => {
   }
 
 const submitScore = async () => {
-  const finalName = nameDraft.trim() || playerName.trim() || 'Player'
+  const finalName = (nameDraft.trim() || playerName.trim() || 'Player').slice(0, 20)
   setPlayerName(finalName)
+
+  if (isInappropriateName(finalName)) {
+    setNameError('Please refrain from using inappropriate names!')
+    return
+  }
+
+  setNameError('')
 
   if (!cloudReady) {
     setLeaderboardError('Add your Supabase URL and anon key to enable the global leaderboard.')
@@ -526,11 +569,16 @@ const submitScore = async () => {
 
                     <div className="name-area">
                       <input
-                        className="text-input"
-                        value={nameDraft}
-                        onChange={(e) => setNameDraft(e.target.value)}
-                        placeholder="Enter a name for the leaderboard"
-                      />
+  className="text-input"
+  value={nameDraft}
+  onChange={(e) => {
+    setNameDraft(e.target.value)
+    if (nameError) setNameError('')
+  }}
+  placeholder="Enter a name for the leaderboard"
+  maxLength={20}
+/>
+                      {nameError && <div className="name-error-text">Please refrain from using inappropriate names!</div>}
                       <button
                         className="button button-success"
                         onClick={submitScore}
