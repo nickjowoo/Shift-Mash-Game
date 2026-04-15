@@ -773,23 +773,26 @@ export default function App() {
     </div>
   </div>
 </aside>
+        </div>
+
         <footer className="site-footer">
-  <div className="community-total">
-    All-time total: <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
-  </div>
-  <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
-  <div className="footer-meta">
-    <span className="footer-year">2026</span>
-    <span className="footer-separator">•</span>
-    <button
-      className="privacy-policy-button"
-      type="button"
-      onClick={() => setShowPrivacyPolicy(true)}
-    >
-      Privacy Policy
-    </button>
-  </div>
-</footer>
+          <div className="community-total">
+            All-time total:{' '}
+            <span className="community-total-value">{totalPresses.toLocaleString()}</span> presses
+          </div>
+          <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+          <div className="footer-meta">
+            <span className="footer-year">2026</span>
+            <span className="footer-separator">•</span>
+            <button
+              className="privacy-policy-button"
+              type="button"
+              onClick={() => setShowPrivacyPolicy(true)}
+            >
+              Privacy Policy
+            </button>
+          </div>
+        </footer>
       </div>
     </div>
   )
