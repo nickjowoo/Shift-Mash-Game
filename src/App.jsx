@@ -145,9 +145,12 @@ function getPlayerPosition(leaderboard, submittedId) {
 const SiteFooter = React.memo(function SiteFooter() {
   return (
     <footer className="site-footer">
-      <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
-      <div className="footer-year">2026</div>
-    </footer>
+  <div className="community-total">
+    Community total: <span className="community-total-value">{communityTotal.toLocaleString()}</span> presses
+  </div>
+  <div className="footer-credit">Made by Nick W., Kyle S., Felipe L.P.</div>
+  <div className="footer-year">2026</div>
+</footer>
   )
 })
 function isInappropriateName(name) {
@@ -232,6 +235,9 @@ export default function App() {
 const playerPosition = useMemo(() => {
   return getPlayerPosition(leaderboard, lastSubmittedId)
 }, [leaderboard, lastSubmittedId])
+  const communityTotal = useMemo(() => {
+  return leaderboard.reduce((sum, entry) => sum + (entry.score || 0), 0)
+}, [leaderboard])
 
   useEffect(() => {
     setIsMobileDevice(detectMobileDevice())
