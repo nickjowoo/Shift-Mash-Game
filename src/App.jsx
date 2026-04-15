@@ -616,25 +616,6 @@ const [adminToken, setAdminToken] = useState('')
           <div className="policy-header">
             <h3 className="policy-title">Admin Access</h3>
             <button
-              className="policy-close"
-              type="button"
-              onClick={() => setShowAdminLogin(false)}
-              aria-label="Close admin login"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="policy-content">
-            <input
-              className="text-input"
-              type="password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              placeholder="Enter password"
-            />
-            {adminError && <div className="name-error-text">{adminError}</div>}
-            <button
   className="button button-primary"
   type="button"
   onClick={async () => {
