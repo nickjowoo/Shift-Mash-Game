@@ -1,6 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { playTap, playRankUp, startMusic, stopMusic } from './sounds'
+import {
+  playTap,
+  playRankUp,
+  startMusic,
+  stopMusic,
+  initAudio,
+  getAudioPrefs,
+  setMusicMuted,
+  setSfxMuted,
+} from './sounds'
 
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
@@ -280,6 +289,10 @@ const [adminToken, setAdminToken] = useState('')
 const [isAdminVerified, setIsAdminVerified] = useState(false)
 const [rankFlash, setRankFlash] = useState(false)
 
+  //audio
+const [musicMuted, setMusicMutedState] = useState(false)
+const [sfxMuted, setSfxMutedState] = useState(false)
+
 
   
 
@@ -364,6 +377,33 @@ const [rankFlash, setRankFlash] = useState(false)
   }, 10000)
 
   return () => clearInterval(interval)
+}, [])
+  useEffect(() => {
+  const prefs = getAudioPrefs()
+  setMusicMutedState(prefs.musicMuted)
+  setSfxMutedState(prefs.sfxMuted)
+
+  let started = false
+
+  const bootAudio = async () => {
+    if (started) return
+    started = true
+
+    await initAudio()
+    await startMusic()
+  }
+
+  const events = ['pointerdown', 'keydown', 'touchstart']
+
+  events.forEach((eventName) => {
+    window.addEventListener(eventName, bootAudio, { once: true })
+  })
+
+  return () => {
+    events.forEach((eventName) => {
+      window.removeEventListener(eventName, bootAudio)
+    })
+  }
 }, [])
 
   useEffect(() => {
@@ -460,7 +500,6 @@ const [rankFlash, setRankFlash] = useState(false)
   }, [phase])
 
   const beginGame = () => {
-    startMusic()
     setScore(0)
     setTimeLeft(GAME_DURATION)
     setCountdown(PRE_COUNTDOWN)
@@ -505,7 +544,6 @@ const [rankFlash, setRankFlash] = useState(false)
   }
 
   const finishGame = () => {
-    stopMusic()
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     flushScore()
@@ -516,7 +554,6 @@ const [rankFlash, setRankFlash] = useState(false)
   }
 
   const resetGame = () => {
-    stopMusic()
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     if (countdownRef.current) clearInterval(countdownRef.current)
@@ -1007,6 +1044,37 @@ const [rankFlash, setRankFlash] = useState(false)
   </div>
 </aside>
         </div>
+
+
+    <div className="audio-controls" aria-label="Audio controls">
+  <button
+    className={`audio-toggle ${musicMuted ? 'is-muted' : ''}`}
+    type="button"
+    onClick={() => {
+      const next = !musicMuted
+      setMusicMutedState(next)
+      setMusicMuted(next)
+    }}
+    aria-label={musicMuted ? 'Unmute background music' : 'Mute background music'}
+    title={musicMuted ? 'Unmute music' : 'Mute music'}
+  >
+    ♪
+  </button>
+
+  <button
+    className={`audio-toggle ${sfxMuted ? 'is-muted' : ''}`}
+    type="button"
+    onClick={() => {
+      const next = !sfxMuted
+      setSfxMutedState(next)
+      setSfxMuted(next)
+    }}
+    aria-label={sfxMuted ? 'Unmute click sounds' : 'Mute click sounds'}
+    title={sfxMuted ? 'Unmute clicks' : 'Mute clicks'}
+  >
+    ⌨
+  </button>
+</div>
 
         <footer className="site-footer">
           <div className="community-total">
