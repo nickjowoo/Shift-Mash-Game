@@ -767,6 +767,40 @@ input {
   box-shadow: 0 0 10px rgba(205, 127, 50, 0.12);
 }
 
+.audio-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.6rem;
+}
+
+.audio-toggle {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+  opacity: 0.82;
+}
+
+.audio-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  opacity: 1;
+}
+
+.audio-toggle.is-muted {
+  opacity: 0.45;
+}
+
 .site-footer {
   margin-top: 14px;
   text-align: center;
