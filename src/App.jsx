@@ -263,7 +263,7 @@ async function updateAnnouncement(adminToken, message) {
 
 async function fetchSiteTheme() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/site_settings?select=id,theme,updated_at&id=eq.1`,
+    `${SUPABASE_URL}/rest/v1/site_settings?select=id,theme&id=eq.1`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -272,29 +272,34 @@ async function fetchSiteTheme() {
     }
   )
 
-  if (!response.ok) throw new Error('Failed to fetch site theme')
-  const rows = await response.json()
-  return rows?.[0]?.theme || 'default'
+  const data = await response.json().catch(() => [])
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch site theme')
+  }
+
+  return data?.[0]?.theme || 'default'
 }
 
 async function updateSiteTheme(adminToken, theme) {
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/set-site-theme`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${adminToken}`,
-    },
-    body: JSON.stringify({
-      action: 'update',
-      theme,
-    }),
-  })
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({ theme }),
+    }
+  )
 
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data?.error || `Failed to update site theme (${response.status})`)
+    throw new Error(data?.message || data?.error || `Failed to update site theme (${response.status})`)
   }
 
   return data
