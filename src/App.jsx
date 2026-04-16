@@ -19,7 +19,6 @@ const RESET_MS = RESET_HOURS * 60 * 60 * 1000
 const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_SbcuqjkKm40oS6iA5bWBog_8xkxhFrP'
 const SUPABASE_TABLE = 'scores'
-const ALLOWED_THEMES = ['default', 'midnight', 'sunset', 'neon', 'forest']
 
 const CALLOUTS = [
   'Go, go, go!',
@@ -261,49 +260,8 @@ async function updateAnnouncement(adminToken, message) {
   return data
 }
 
-async function fetchSiteTheme() {
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/site_settings?select=id,theme&id=eq.1`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    }
-  )
 
-  const data = await response.json().catch(() => [])
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch site theme')
-  }
-
-  return data?.[0]?.theme || 'default'
-}
-
-async function updateSiteTheme(adminToken, theme) {
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        Prefer: 'return=representation',
-      },
-      body: JSON.stringify({ theme }),
-    }
-  )
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.error || `Failed to update site theme (${response.status})`)
-  }
-
-  return data
-}
 
 
 export default function App() {
@@ -338,9 +296,7 @@ const [rankFlash, setRankFlash] = useState(false)
 const [musicMuted, setMusicMutedState] = useState(false)
 const [sfxMuted, setSfxMutedState] = useState(false)
 
-  
-const [siteTheme, setSiteTheme] = useState('default')
-const [themeDraft, setThemeDraft] = useState('default')
+
 
 
   
@@ -680,7 +636,7 @@ useEffect(() => {
   const mainDisplay = phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
 
   return (
-  <div className="app-shell" data-theme={siteTheme}>
+  <div className="app-shell">
     {showPrivacyPolicy && (
       <div className="policy-overlay" onClick={() => setShowPrivacyPolicy(false)}>
         <div className="policy-modal" onClick={(e) => e.stopPropagation()}>
