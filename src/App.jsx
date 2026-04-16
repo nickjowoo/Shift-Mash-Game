@@ -260,6 +260,45 @@ async function updateAnnouncement(adminToken, message) {
   return data
 }
 
+async function fetchSiteTheme() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/site_settings?select=id,theme,updated_at&id=eq.1`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    }
+  )
+
+  if (!response.ok) throw new Error('Failed to fetch site theme')
+  const rows = await response.json()
+  return rows?.[0]?.theme || 'default'
+}
+
+async function updateSiteTheme(adminToken, theme) {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/set-site-theme`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${adminToken}`,
+    },
+    body: JSON.stringify({
+      action: 'update',
+      theme,
+    }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Failed to update site theme (${response.status})`)
+  }
+
+  return data
+}
+
 
 export default function App() {
   const [phase, setPhase] = useState('idle')
@@ -292,6 +331,10 @@ const [rankFlash, setRankFlash] = useState(false)
   //audio
 const [musicMuted, setMusicMutedState] = useState(false)
 const [sfxMuted, setSfxMutedState] = useState(false)
+
+  
+const [siteTheme, setSiteTheme] = useState('default')
+const [themeDraft, setThemeDraft] = useState('default')
 
 
   
@@ -378,6 +421,32 @@ const [sfxMuted, setSfxMutedState] = useState(false)
 
   return () => clearInterval(interval)
 }, [])
+
+useEffect(() => {
+  const initTheme = async () => {
+    try {
+      const theme = await fetchSiteTheme()
+      setSiteTheme(theme)
+      setThemeDraft(theme)
+    } catch (err) {
+      console.error('Could not load site theme', err)
+    }
+  }
+
+  initTheme()
+
+  const interval = setInterval(async () => {
+    try {
+      const theme = await fetchSiteTheme()
+      setSiteTheme(theme)
+    } catch (err) {
+      console.error('Could not poll site theme', err)
+    }
+  }, 10000)
+
+  return () => clearInterval(interval)
+}, [])
+  
   useEffect(() => {
   const prefs = getAudioPrefs()
   setMusicMutedState(prefs.musicMuted)
@@ -605,7 +674,7 @@ const [sfxMuted, setSfxMutedState] = useState(false)
   const mainDisplay = phase === 'countdown' ? (countdown > 0 ? countdown : 'GO!') : score
 
   return (
-  <div className="app-shell">
+  <div className="app-shell" data-theme={siteTheme}>
     {showPrivacyPolicy && (
       <div className="policy-overlay" onClick={() => setShowPrivacyPolicy(false)}>
         <div className="policy-modal" onClick={(e) => e.stopPropagation()}>
@@ -707,6 +776,57 @@ const [sfxMuted, setSfxMutedState] = useState(false)
           {isAdminVerified ? 'Verified' : 'Verify'}
         </button>
 
+        <div className="admin-theme-section">
+  <label className="label-small" htmlFor="theme-select">
+    Site Theme
+  </label>
+
+  <select
+    id="theme-select"
+    className="text-input"
+    value={themeDraft}
+    onChange={(e) => setThemeDraft(e.target.value)}
+    disabled={!isAdminVerified}
+  >
+    <option value="default">Default</option>
+    <option value="midnight">Midnight</option>
+    <option value="sunset">Sunset</option>
+    <option value="neon">Neon</option>
+    <option value="forest">Forest</option>
+  </select>
+</div>
+
+        <button
+  className="button button-primary"
+  type="button"
+  disabled={!isAdminVerified}
+  onClick={async () => {
+    try {
+      if (!adminToken) {
+        setAdminError('Admin access expired. Verify the password again.')
+        setIsAdminVerified(false)
+        return
+      }
+
+      setAdminError('')
+
+      await updateSiteTheme(adminToken, themeDraft)
+
+      setSiteTheme(themeDraft)
+      setShowAdminPanel(false)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to update theme.'
+
+      setAdminToken('')
+      setIsAdminVerified(false)
+      setAdminError(message)
+    }
+  }}
+>
+  Save Theme
+</button>
+
         <textarea
           className={`announcement-editor ${isAdminVerified ? 'announcement-editor-enabled' : 'announcement-editor-disabled'}`}
           value={announcementDraft}
@@ -756,6 +876,7 @@ const [sfxMuted, setSfxMutedState] = useState(false)
         >
           Submit Announcement
         </button>
+        
       </div>
     </div>
   </div>
