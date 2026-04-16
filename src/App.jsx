@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { playTap, playRankUp } from './sounds'
 
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
@@ -367,6 +368,7 @@ const [rankFlash, setRankFlash] = useState(false)
 
   useEffect(() => {
   if (rank.label !== prevRankRef.current) {
+    playRankUp()
     prevRankRef.current = rank.label
     setRankFlash(true)
     setTimeout(() => setRankFlash(false), 600)
@@ -418,6 +420,7 @@ const [rankFlash, setRankFlash] = useState(false)
 
   const registerPress = (keyLabel) => {
     if (phase !== 'playing') return
+    playTap()
 
     pendingPressesRef.current += 1
     setLastKey(keyLabel)
