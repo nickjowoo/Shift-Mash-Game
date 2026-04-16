@@ -19,6 +19,7 @@ const RESET_MS = RESET_HOURS * 60 * 60 * 1000
 const SUPABASE_URL = 'https://sncstykvostyqtgrwhpn.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_SbcuqjkKm40oS6iA5bWBog_8xkxhFrP'
 const SUPABASE_TABLE = 'scores'
+const ALLOWED_THEMES = ['default', 'midnight', 'sunset', 'neon', 'forest']
 
 const CALLOUTS = [
   'Go, go, go!',
