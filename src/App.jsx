@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { playTap, playRankUp } from './sounds'
+import { playTap, playRankUp, startMusic, stopMusic } from './sounds'
 
 const GAME_DURATION = 20
 const PRE_COUNTDOWN = 3
@@ -460,6 +460,7 @@ const [rankFlash, setRankFlash] = useState(false)
   }, [phase])
 
   const beginGame = () => {
+    startMusic()
     setScore(0)
     setTimeLeft(GAME_DURATION)
     setCountdown(PRE_COUNTDOWN)
@@ -504,6 +505,7 @@ const [rankFlash, setRankFlash] = useState(false)
   }
 
   const finishGame = () => {
+    stopMusic()
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     flushScore()
@@ -514,6 +516,7 @@ const [rankFlash, setRankFlash] = useState(false)
   }
 
   const resetGame = () => {
+    stopMusic()
     if (gameTimerRef.current) cancelAnimationFrame(gameTimerRef.current)
     if (scoreFrameRef.current) cancelAnimationFrame(scoreFrameRef.current)
     if (countdownRef.current) clearInterval(countdownRef.current)
