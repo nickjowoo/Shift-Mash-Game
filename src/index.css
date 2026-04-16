@@ -402,6 +402,21 @@ input {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.admin-theme-section {
+  margin: 4px 0 10px;
+}
+
+.admin-theme-section .label-small {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.admin-theme-section .text-input {
+  margin-bottom: 0;
+}
+
+
+
 .button-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -1066,9 +1081,9 @@ input {
     min-height: 84px;
     font-size: 1.5rem;
     font-weight: 900;
-    color: #ffffff;
-    background: rgba(37, 99, 235, 0.95);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    color: var(--text-main);
+    background: var(--accent);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22), var(--glow);
   }
 
   .mobile-mash-button:disabled {
