@@ -1,6 +1,8 @@
 let audioCtx = null
 let musicNodes = []
-let musicPlaying = false:contentReference[oaicite:2]{index=2}ar = 0
+let musicPlaying = false
+let scheduleTimer = null
+let currentBar = 0
 let startTime = 0
 
 let musicMuted = false
@@ -53,7 +55,7 @@ export function setMusicMuted(value) {
   musicMuted = Boolean(value)
   persistPref(STORAGE_KEYS.musicMuted, musicMuted)
 
-  const master = musicNodes.find((node) => node?.__type === 'master')
+  const master = musicNodes.find((node) => node && node.__type === 'master')
   if (master && audioCtx) {
     master.gain.cancelScheduledValues(audioCtx.currentTime)
     master.gain.setValueAtTime(musicMuted ? 0 : 0.32, audioCtx.currentTime)
@@ -123,10 +125,10 @@ const SCHEDULE_INTERVAL = 100
 
 function schedulePad(ctx, master, time, duration, chordIndex) {
   const chords = [
-    [220.0, 261.63, 329.63], // Am-ish color
-    [196.0, 246.94, 293.66], // G
-    [174.61, 220.0, 261.63], // F
-    [196.0, 233.08, 293.66], // Bb/Gm-ish color
+    [220.0, 261.63, 329.63],
+    [196.0, 246.94, 293.66],
+    [174.61, 220.0, 261.63],
+    [196.0, 233.08, 293.66],
   ]
 
   const chord = chords[chordIndex % chords.length]
