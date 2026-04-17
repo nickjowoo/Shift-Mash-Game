@@ -1070,8 +1070,7 @@ useEffect(() => {
       <div>
         <h2 className="side-title">Global Leaderboard 👑</h2>
         <div className="side-subtitle reset-row">
-          <span className="reset-icon" aria-hidden="true">🕒</span>
-          <span className="reset-text">Refreshes every 48h</span>
+          <span className="reset-text">Resets every 48h</span>
           <span className="reset-text">•</span>
           <span className="reset-text">Resets in {resetCountdown}</span>
         </div>
