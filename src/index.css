@@ -157,10 +157,16 @@ input {
   border-radius: 24px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
 }
 
 .card-inner {
   padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .header-row,
@@ -408,6 +414,8 @@ input {
   background: var(--soft-bg-2);
   overflow: hidden;
 }
+
+
 .callout-label {
   position: absolute;
   top: 14px;
@@ -637,10 +645,11 @@ input {
 }
 
 .leaderboard-scroll {
-  max-height: 460px;
+  height: 460px;
   overflow-y: auto;
   padding-right: 4px;
   margin-top: 8px;
+  flex-shrink: 0;
 }
 
 .leaderboard-scroll::-webkit-scrollbar {
@@ -751,6 +760,7 @@ input {
 }
 
 .player-position-card {
+  flex-shrink: 0;
   margin-top: 10px;
   padding: 12px;
   background: rgba(15, 23, 42, 0.92);
