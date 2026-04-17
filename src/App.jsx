@@ -69,13 +69,15 @@ function getNextResetTime() {
   return getCurrentCycleStart() + RESET_MS
 }
 
+// AFTER
 function formatCountdown(ms) {
-  const totalHours = Math.max(0, Math.floor(ms / (1000 * 60 * 60)))
-  const days = Math.floor(totalHours / 24)
-  const hours = totalHours % 24
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const days = Math.floor(totalSeconds / (24 * 60 * 60))
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60))
+  const seconds = totalSeconds % 60
 
-  if (days > 0) return `${days}d ${hours}h`
-  return `${hours}h`
+  if (days > 0) return `${days}d ${hours}h ${seconds}s`
+  return `${hours}h ${seconds}s`
 }
 
 function detectMobileDevice() {
